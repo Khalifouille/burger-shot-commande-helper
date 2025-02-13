@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import json
+import os
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
@@ -76,8 +78,31 @@ def confirmer_vente():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+def sauvegarder_preferences():
+    preferences = {
+        "nom": nom_entry.get(),
+        "feuille": feuille_combobox.get()
+    }
+    dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
+    if not os.path.exists(dossier_preferences):
+        os.makedirs(dossier_preferences)
+    chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
+    with open(chemin_fichier, "w") as f:
+        json.dump(preferences, f)
+
+def charger_preferences():
+    dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
+    chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
+    try:
+        with open(chemin_fichier, "r") as f:
+            preferences = json.load(f)
+            nom_entry.insert(0, preferences.get("nom", ""))
+            feuille_combobox.set(preferences.get("feuille", ""))
+    except FileNotFoundError:
+        pass
+
 app = tk.Tk()
-app.title("Burger Shot - Helper")
+app.title("Burger Shot - Commande Helper")
 
 titre_label = tk.Label(app, text="ENREGISTREMENT DES VENTES", font=("Arial", 16, "bold"))
 titre_label.grid(row=0, column=0, columnspan=2, pady=10)
@@ -140,5 +165,9 @@ confirmer_button.grid(row=10, column=0, columnspan=2, padx=10, pady=10)
 
 resultat_label = tk.Label(app, text="")
 resultat_label.grid(row=11, column=0, columnspan=2, padx=10, pady=10)
+
+charger_preferences()
+
+app.protocol("WM_DELETE_WINDOW", lambda: [sauvegarder_preferences(), app.quit()])
 
 app.mainloop()
