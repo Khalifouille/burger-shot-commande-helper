@@ -86,8 +86,10 @@ def charger_fichier():
     fichier_id = fichier_id_entry.get()
     try:
         fichier = client.open_by_key(fichier_id)
-        feuille_combobox["values"] = get_sheet_names()
-        feuille_combobox.current(0)
+        feuilles = get_sheet_names()
+        feuille_combobox["values"] = feuilles
+        if feuilles: 
+            feuille_combobox.current(0)
         resultat_label.config(text="Fichier chargé avec succès !")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
@@ -123,7 +125,7 @@ app.title("Burger Shot - Commande Helper")
 titre_label = tk.Label(app, text="ENREGISTREMENT DES VENTES", font=("Arial", 16, "bold"))
 titre_label.grid(row=0, column=0, columnspan=2, pady=10)
 
-fichier_id_label = tk.Label(app, text="ID du fichier Google Sheets :")
+fichier_id_label = tk.Label(app, text="ID GSheets :")
 fichier_id_label.grid(row=1, column=0, padx=10, pady=10)
 fichier_id_entry = tk.Entry(app)
 fichier_id_entry.grid(row=1, column=1, padx=10, pady=10)
@@ -136,11 +138,10 @@ nom_label.grid(row=2, column=0, padx=10, pady=10)
 nom_entry = tk.Entry(app)
 nom_entry.grid(row=2, column=1, padx=10, pady=10)
 
-feuille_label = tk.Label(app, text="Feuilles :")
+feuille_label = tk.Label(app, text="Sélectionner la feuille :")
 feuille_label.grid(row=3, column=0, padx=10, pady=10)
-feuille_combobox = ttk.Combobox(app, values=get_sheet_names())
+feuille_combobox = ttk.Combobox(app, values=[])
 feuille_combobox.grid(row=3, column=1, padx=10, pady=10)
-feuille_combobox.current(0)
 
 menu_classic_label = tk.Label(app, text="Menu Classic:")
 menu_classic_label.grid(row=4, column=0, padx=10, pady=10)
