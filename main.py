@@ -9,14 +9,16 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
 client = gspread.authorize(creds)
 
-fichier_id = "1AbG1Cbei_ny33IFpC5Hyi2LkU00xe84xTQNsnVFUoVY"
-
-fichier = client.open_by_key(fichier_id)
+fichier = None
 
 def get_sheet_names():
+    global fichier
     try:
-        feuilles = fichier.worksheets()
-        return [feuille.title for feuille in feuilles]  
+        if fichier:
+            feuilles = fichier.worksheets()
+            return [feuille.title for feuille in feuilles]  
+        else:
+            return []
     except Exception as e:
         print(f"Erreur lors de la récupération des feuilles : {e}")
         return []
@@ -55,6 +57,7 @@ def ajouter_valeurs(sheet, ligne, valeurs):
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
 
 def confirmer_vente():
+    global fichier
     try:
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
@@ -78,10 +81,22 @@ def confirmer_vente():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+def charger_fichier():
+    global fichier
+    fichier_id = fichier_id_entry.get()
+    try:
+        fichier = client.open_by_key(fichier_id)
+        feuille_combobox["values"] = get_sheet_names()
+        feuille_combobox.current(0)
+        resultat_label.config(text="Fichier chargé avec succès !")
+    except Exception as e:
+        resultat_label.config(text=f"Erreur : {e}")
+
 def sauvegarder_preferences():
     preferences = {
         "nom": nom_entry.get(),
-        "feuille": feuille_combobox.get()
+        "feuille": feuille_combobox.get(),
+        "fichier_id": fichier_id_entry.get()
     }
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
     if not os.path.exists(dossier_preferences):
@@ -98,6 +113,7 @@ def charger_preferences():
             preferences = json.load(f)
             nom_entry.insert(0, preferences.get("nom", ""))
             feuille_combobox.set(preferences.get("feuille", ""))
+            fichier_id_entry.insert(0, preferences.get("fichier_id", ""))
     except FileNotFoundError:
         pass
 
@@ -107,64 +123,72 @@ app.title("Burger Shot - Commande Helper")
 titre_label = tk.Label(app, text="ENREGISTREMENT DES VENTES", font=("Arial", 16, "bold"))
 titre_label.grid(row=0, column=0, columnspan=2, pady=10)
 
-nom_label = tk.Label(app, text="Votre nom :")
-nom_label.grid(row=1, column=0, padx=10, pady=10)
-nom_entry = tk.Entry(app)
-nom_entry.grid(row=1, column=1, padx=10, pady=10)
+fichier_id_label = tk.Label(app, text="ID du fichier Google Sheets :")
+fichier_id_label.grid(row=1, column=0, padx=10, pady=10)
+fichier_id_entry = tk.Entry(app)
+fichier_id_entry.grid(row=1, column=1, padx=10, pady=10)
 
-feuille_label = tk.Label(app, text="Sélectionner la feuille :")
-feuille_label.grid(row=2, column=0, padx=10, pady=10)
+charger_fichier_button = tk.Button(app, text="Charger le fichier", command=charger_fichier)
+charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
+
+nom_label = tk.Label(app, text="Votre nom :")
+nom_label.grid(row=2, column=0, padx=10, pady=10)
+nom_entry = tk.Entry(app)
+nom_entry.grid(row=2, column=1, padx=10, pady=10)
+
+feuille_label = tk.Label(app, text="Feuilles :")
+feuille_label.grid(row=3, column=0, padx=10, pady=10)
 feuille_combobox = ttk.Combobox(app, values=get_sheet_names())
-feuille_combobox.grid(row=2, column=1, padx=10, pady=10)
+feuille_combobox.grid(row=3, column=1, padx=10, pady=10)
 feuille_combobox.current(0)
 
 menu_classic_label = tk.Label(app, text="Menu Classic:")
-menu_classic_label.grid(row=3, column=0, padx=10, pady=10)
+menu_classic_label.grid(row=4, column=0, padx=10, pady=10)
 menu_classic_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-menu_classic_combobox.grid(row=3, column=1, padx=10, pady=10)
+menu_classic_combobox.grid(row=4, column=1, padx=10, pady=10)
 menu_classic_combobox.current(0)
 
 menu_double_label = tk.Label(app, text="Menu Double:")
-menu_double_label.grid(row=4, column=0, padx=10, pady=10)
+menu_double_label.grid(row=5, column=0, padx=10, pady=10)
 menu_double_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-menu_double_combobox.grid(row=4, column=1, padx=10, pady=10)
+menu_double_combobox.grid(row=5, column=1, padx=10, pady=10)
 menu_double_combobox.current(0)
 
 menu_contrat_label = tk.Label(app, text="Menu Contrat:")
-menu_contrat_label.grid(row=5, column=0, padx=10, pady=10)
+menu_contrat_label.grid(row=6, column=0, padx=10, pady=10)
 menu_contrat_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-menu_contrat_combobox.grid(row=5, column=1, padx=10, pady=10)
+menu_contrat_combobox.grid(row=6, column=1, padx=10, pady=10)
 menu_contrat_combobox.current(0)
 
 tenders_label = tk.Label(app, text="Tenders:")
-tenders_label.grid(row=6, column=0, padx=10, pady=10)
+tenders_label.grid(row=7, column=0, padx=10, pady=10)
 tenders_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-tenders_combobox.grid(row=6, column=1, padx=10, pady=10)
+tenders_combobox.grid(row=7, column=1, padx=10, pady=10)
 tenders_combobox.current(0)
 
 petite_salade_label = tk.Label(app, text="Petite Salade:")
-petite_salade_label.grid(row=7, column=0, padx=10, pady=10)
+petite_salade_label.grid(row=8, column=0, padx=10, pady=10)
 petite_salade_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-petite_salade_combobox.grid(row=7, column=1, padx=10, pady=10)
+petite_salade_combobox.grid(row=8, column=1, padx=10, pady=10)
 petite_salade_combobox.current(0)
 
 boisson_label = tk.Label(app, text="Boisson:")
-boisson_label.grid(row=8, column=0, padx=10, pady=10)
+boisson_label.grid(row=9, column=0, padx=10, pady=10)
 boisson_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-boisson_combobox.grid(row=8, column=1, padx=10, pady=10)
+boisson_combobox.grid(row=9, column=1, padx=10, pady=10)
 boisson_combobox.current(0)
 
 milkshake_label = tk.Label(app, text="MilkShake:")
-milkshake_label.grid(row=9, column=0, padx=10, pady=10)
+milkshake_label.grid(row=10, column=0, padx=10, pady=10)
 milkshake_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-milkshake_combobox.grid(row=9, column=1, padx=10, pady=10)
+milkshake_combobox.grid(row=10, column=1, padx=10, pady=10)
 milkshake_combobox.current(0)
 
 confirmer_button = tk.Button(app, text="Confirmer la vente", command=confirmer_vente)
-confirmer_button.grid(row=10, column=0, columnspan=2, padx=10, pady=10)
+confirmer_button.grid(row=11, column=0, columnspan=2, padx=10, pady=10)
 
 resultat_label = tk.Label(app, text="")
-resultat_label.grid(row=11, column=0, columnspan=2, padx=10, pady=10)
+resultat_label.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
 
 charger_preferences()
 
