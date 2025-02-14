@@ -19,6 +19,16 @@ fichiers_ids = {
     "Ventes contrat": "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU"
 }
 
+prix_unitaires = {
+    "Menu Classic": 100,
+    "Menu Double": 120,
+    "Menu Contrat": 0,
+    "Tenders": 60,
+    "Petite Salade": 60,
+    "Boisson": 30,
+    "Milkshake": 40,
+}
+
 def get_sheet_names():
     global fichier
     try:
@@ -142,14 +152,12 @@ def confirmer_vente2():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
-
 def ajouter_client():
     client_label2 = tk.Label(app, text="Client :")
     client_entry2 = tk.Entry(app)
     client_label2.grid(row=len(client_entry.winfo_children())+5, column=0, padx=10, pady=10)
     client_entry2.grid(row=len(client_entry.winfo_children())+5, column=1, padx=10, pady=10)
     client_entry2.focus()
-
 
 def enregistrer_vente():
     global fichier
@@ -229,8 +237,9 @@ def afficher_elements():
     boisson_combobox.grid(row=9, column=1, padx=10, pady=10)
     milkshake_label.grid(row=10, column=0, padx=10, pady=10)
     milkshake_combobox.grid(row=10, column=1, padx=10, pady=10)
-    confirmer_button.grid(row=11, column=0, columnspan=3, padx=10, pady=10)
-    resultat_label.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
+    prix_total_label.grid(row=11, column=0, columnspan=2, padx=10, pady=10)  # Ajout du label du prix total
+    confirmer_button.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
+    resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
 
 def afficher_elements2():
     masquer_tous_les_elements()
@@ -250,7 +259,7 @@ def masquer_elements():
     elements_a_cacher = [nom_label, nom_entry, feuille_label, feuille_combobox, menu_classic_label, menu_classic_combobox,
                          menu_double_label, menu_double_combobox, menu_contrat_label, menu_contrat_combobox,
                          tenders_label, tenders_combobox, petite_salade_label, petite_salade_combobox,
-                         boisson_label, boisson_combobox, milkshake_label, milkshake_combobox, confirmer_button,
+                         boisson_label, boisson_combobox, milkshake_label, milkshake_combobox, prix_total_label, confirmer_button,
                          resultat_label]
     for elem in elements_a_cacher:
         elem.grid_remove()
@@ -305,6 +314,24 @@ def charger_preferences():
         print("Fichier de préférences non trouvé.")
     except Exception as e:
         print(f"Erreur lors du chargement des préférences : {e}")
+
+def calculer_prix_total():
+    try:
+        quantites = {
+            "Menu Classic": int(menu_classic_combobox.get()),
+            "Menu Double": int(menu_double_combobox.get()),
+            "Menu Contrat": int(menu_contrat_combobox.get()),
+            "Tenders": int(tenders_combobox.get()),
+            "Petite Salade": int(petite_salade_combobox.get()),
+            "Boisson": int(boisson_combobox.get()),
+            "Milkshake": int(milkshake_combobox.get()),
+        }
+        prix_total = 0
+        for produit, quantite in quantites.items():
+            prix_total += quantite * prix_unitaires[produit]
+        prix_total_label.config(text=f"Prix total : {prix_total} €")
+    except ValueError:
+        prix_total_label.config(text="Prix total : 0 €")
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -369,6 +396,9 @@ milkshake_label = tk.Label(app, text="Milkshake:")
 milkshake_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 milkshake_combobox.current(0)
 
+# Ajout du label pour afficher le prix total
+prix_total_label = tk.Label(app, text="Prix total : 0 $")
+
 confirmer_button = tk.Button(app, text="Confirmer la vente", command=confirmer_vente)
 
 confirmer_button2 = tk.Button(app, text="Confirmer la vente", command=confirmer_vente2)
@@ -379,6 +409,10 @@ sauvegarder_preferences_button = tk.Button(app, text="Sauvegarder les préféren
 sauvegarder_preferences_button.grid(row=13, column=0, columnspan=3, padx=10, pady=10) 
 
 resultat_label = tk.Label(app, text="")
+
+for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
+                 tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
+    combobox.bind("<<ComboboxSelected>>", lambda event: calculer_prix_total())
 
 charger_preferences()
 app.mainloop()
