@@ -249,7 +249,8 @@ def sauvegarder_preferences():
     preferences = {
         "nom": nom_entry.get(),
         "feuille": feuille_combobox.get(),
-        "fichier_id": feuille_id_combobox.get()
+        "fichier_id": feuille_id_combobox.get(),
+        "vendeur" : nom2_entry.get(),
     }
 
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
@@ -273,6 +274,7 @@ def charger_preferences():
             preferences = json.load(f)
             print(f"Préférences chargées : {preferences}")
             nom_entry.insert(0, preferences.get("nom", ""))
+            nom2_entry.insert(0, preferences.get("vendeur", ""))
             feuille_combobox.set(preferences.get("feuille", ""))
             feuille_id_combobox.set(preferences.get("fichier_id", ""))
             fichier_id = preferences.get("fichier_id", "")
