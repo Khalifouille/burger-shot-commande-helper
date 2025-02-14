@@ -6,7 +6,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
 
-# Autorisation de l'API Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
 client = gspread.authorize(creds)
@@ -18,12 +17,25 @@ def get_sheet_names():
     try:
         if fichier:
             feuilles = fichier.worksheets()
-            return [feuille.title for feuille in feuilles]  
+            noms_feuilles = [feuille.title for feuille in feuilles]
+            return noms_feuilles
         else:
             return []
     except Exception as e:
         print(f"Erreur lors de la récupération des feuilles : {e}")
         return []
+
+
+def trouver_premiere_ligne_vide(sheet):
+    try:
+        lignes = sheet.get_all_values()
+        for i, ligne in enumerate(lignes, start=1):  
+            if all(cell == "" for cell in ligne): 
+                return i
+        return len(lignes) + 1
+    except Exception as e:
+        print(f"Erreur lors de la recherche de la première ligne vide : {e}")
+        return None
 
 def trouver_ligne(sheet, nom):
     try:
@@ -82,31 +94,73 @@ def confirmer_vente():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
-def charger_fichier():
+def confirmer_vente2():
     global fichier
-    fichier_id = fichier_id_entry.get()
     try:
-        if fichier_id == "1AbG1Cbei_ny33IFpC5Hyi2LkU00xe84xTQNsnVFUoVY":
-            fichier = client.open_by_key(fichier_id)
-            feuilles = get_sheet_names()
-            feuille_combobox["values"] = feuilles
-            if feuilles:
-                feuille_combobox.current(0)
-            resultat_label.config(text="Fichier chargé avec succès !")
-            afficher_elements()
-        elif fichier_id == "1g9VhwRx2rSETvsjwtHBuHDUkrsJLxyUnelVLujEx1xs":
-            fichier = client.open_by_key(fichier_id)
-            feuilles = get_sheet_names()
-            feuille_combobox["values"] = feuilles
-            if feuilles:
-                feuille_combobox.current(0)
-            resultat_label.config(text="Fichier chargé avec succès !")
-            afficher_elements()
+        nom_feuille = feuille_combobox.get()
+        sheet = fichier.worksheet(nom_feuille)
+        votre_nom = nom_entry.get()
+        valeurs = {
+            "B": int(menu_classic_combobox.get()),  # Vendeur
+            "D": int(menu_double_combobox.get()),  # Client
+            "E": int(menu_contrat_combobox.get()),  # Date
+            "F": int(tenders_combobox.get()),  # Case à cocher
+        }
+
+        ligne = trouver_premiere_ligne_vide(sheet)
+        if ligne:
+            ajouter_valeurs(sheet, ligne, valeurs)
+            resultat_label.config(text="Vente enregistrée avec succès !")
         else:
-            resultat_label.config(text="Erreur : ID de fichier invalide.")
+            resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+def enregistrer_vente():
+    global fichier
+    try:
+        nom_feuille = feuille_combobox.get()
+        sheet = fichier.worksheet(nom_feuille)
+        ligne_vide = trouver_premiere_ligne_vide(sheet)
+        
+        if ligne_vide:
+            vendeur = nom_entry.get()
+            client = client_entry.get()
+            date = date_entry.get()
+            valider = "✅"
+            
+            sheet.update(f"A{ligne_vide}", [[vendeur, menu, client, date, valider]])
+            resultat_label.config(text="Vente enregistrée avec succès !")
+        else:
+            resultat_label.config(text="Erreur : Impossible de trouver une ligne vide.")
+    except Exception as e:
+        resultat_label.config(text=f"Erreur : {e}")
+
+def charger_fichier():
+    global fichier
+    fichier_id = fichier_id_entry.get()
+    
+    fichiers_valides = {
+        "1AbG1Cbei_ny33IFpC5Hyi2LkU00xe84xTQNsnVFUoVY": afficher_elements,
+        "1g9VhwRx2rSETvsjwtHBuHDUkrsJLxyUnelVLujEx1xs": afficher_elements2
+    }
+
+    try:
+        if fichier_id in fichiers_valides:
+            fichier = client.open_by_key(fichier_id)
+            feuilles = get_sheet_names()
+            feuille_combobox["values"] = feuilles
+            
+            if feuilles:
+                feuille_combobox.current(0)
+
+            resultat_label.config(text="Fichier chargé avec succès !")
+            fichiers_valides[fichier_id]()  
+        else:
+            resultat_label.config(text="Erreur : ID de fichier invalide.")
+    
+    except Exception as e:
+        resultat_label.config(text=f"Erreur : {e}")
 
 def afficher_elements():
     nom_label.grid(row=2, column=0, padx=10, pady=10)
@@ -130,6 +184,13 @@ def afficher_elements():
     confirmer_button.grid(row=11, column=0, columnspan=2, padx=10, pady=10)
     resultat_label.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
 
+def afficher_elements2():
+    elements_a_afficher = [feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
+                           date_label, date_entry, confirmer_button, resultat_label]
+    for elem in elements_a_afficher:
+        elem.grid()
+
+
 def masquer_elements():
     nom_label.grid_remove()
     nom_entry.grid_remove()
@@ -151,6 +212,12 @@ def masquer_elements():
     milkshake_combobox.grid_remove()
     confirmer_button.grid_remove()
     resultat_label.grid_remove()
+
+def masquer_elements2():
+    elements_a_cacher = [feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
+                         date_label, date_entry, confirmer_button, resultat_label]
+    for elem in elements_a_cacher:
+        elem.grid_remove()
 
 def sauvegarder_preferences():
     preferences = {
@@ -198,6 +265,15 @@ charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
+
+nom2_label = tk.Label(app, text="Votre nom :")
+nom2_entry = tk.Entry(app)
+
+client_label = tk.Label(app, text="Nom du Client :")
+client_entry = tk.Entry(app)
+
+date_label = tk.Label(app, text="Date :")
+date_entry = tk.Entry(app)
 
 feuille_label = tk.Label(app, text="Sélectionner la feuille :")
 feuille_combobox = ttk.Combobox(app, values=[])
