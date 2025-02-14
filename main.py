@@ -251,12 +251,19 @@ def sauvegarder_preferences():
         "feuille": feuille_combobox.get(),
         "fichier_id": feuille_id_combobox.get()
     }
+
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
     if not os.path.exists(dossier_preferences):
         os.makedirs(dossier_preferences)
+
     chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
-    with open(chemin_fichier, "w") as f:
-        json.dump(preferences, f)
+
+    try:
+        with open(chemin_fichier, "w") as f:
+            json.dump(preferences, f, indent=4) 
+        print("Préférences sauvegardées avec succès.")
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde des préférences : {e}")
 
 def charger_preferences():
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
@@ -264,6 +271,7 @@ def charger_preferences():
     try:
         with open(chemin_fichier, "r") as f:
             preferences = json.load(f)
+            print(f"Préférences chargées : {preferences}")
             nom_entry.insert(0, preferences.get("nom", ""))
             feuille_combobox.set(preferences.get("feuille", ""))
             feuille_id_combobox.set(preferences.get("fichier_id", ""))
@@ -275,9 +283,11 @@ def charger_preferences():
                 feuille_combobox.set(preferences.get("feuille", ""))
             else:
                 fichier = None
-
     except FileNotFoundError:
-        pass
+        print("Fichier de préférences non trouvé.")
+    except Exception as e:
+        print(f"Erreur lors du chargement des préférences : {e}")
+
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -346,9 +356,10 @@ confirmer_button = tk.Button(app, text="Confirmer la vente", command=confirmer_v
 
 confirmer_button2 = tk.Button(app, text="Confirmer la vente", command=confirmer_vente2)
 
-resultat_label = tk.Label(app, text="")
-
 sauvegarder_preferences_button = tk.Button(app, text="Sauvegarder les préférences", command=sauvegarder_preferences)
+sauvegarder_preferences_button.grid(row=13, column=0, columnspan=3, padx=10, pady=10) 
+
+resultat_label = tk.Label(app, text="")
 
 charger_preferences()
 app.mainloop()
