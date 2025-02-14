@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
@@ -170,7 +171,12 @@ def masquer_elements():
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
-titre_label = tk.Label(app, text="ENREGISTREMENT DES VENTES", font=("Arial", 16, "bold"))
+image_path = "bs.png"  
+image = Image.open(image_path)
+image = image.resize((300, 100), Image.ANTIALIAS)  
+photo = ImageTk.PhotoImage(image)
+
+titre_label = tk.Label(app, image=photo)
 titre_label.grid(row=0, column=0, columnspan=2, pady=10)
 
 fichier_id_label = tk.Label(app, text="ID GSheets :")
