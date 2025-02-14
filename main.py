@@ -205,17 +205,19 @@ def afficher_elements():
     boisson_combobox.grid(row=9, column=1, padx=10, pady=10)
     milkshake_label.grid(row=10, column=0, padx=10, pady=10)
     milkshake_combobox.grid(row=10, column=1, padx=10, pady=10)
-    confirmer_button.grid(row=11, column=0, columnspan=2, padx=10, pady=10)
-    resultat_label.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
+    confirmer_button.grid(row=11, column=0, columnspan=3, padx=10, pady=10)
+    resultat_label.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
 
 def afficher_elements2():
     masquer_tous_les_elements()
-    elements_a_afficher = [
-        feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
-        date_label, date_entry, confirmer_button2, resultat_label
-    ]
-    for elem in elements_a_afficher:
-        elem.grid()
+    nom2_label.grid(row=2, column=0, padx=15, pady=10, sticky="w")
+    nom2_entry.grid(row=2, column=1, padx=15, pady=10, columnspan=2)
+    client_label.grid(row=3, column=0, padx=15, pady=10, sticky="w")
+    client_entry.grid(row=3, column=1, padx=15, pady=10, columnspan=2)
+    date_label.grid(row=4, column=0, padx=15, pady=10, sticky="w")
+    date_entry.grid(row=4, column=1, padx=15, pady=10, columnspan=2)
+    confirmer_button2.grid(row=5, column=0, columnspan=3, padx=15, pady=15)
+    resultat_label.grid(row=6, column=0, columnspan=3, padx=15, pady=10)
 
 def masquer_elements():
     nom_label.grid_remove()
@@ -296,11 +298,11 @@ app.title("Burger Shot - Commande Helper")
 
 image_path = "bs.png"  
 image = Image.open(image_path)
-image = image.resize((300, 100), Image.ANTIALIAS)  
+image = image.resize((300, 100), Image.Resampling.LANCZOS)  
 photo = ImageTk.PhotoImage(image)
 
 titre_label = tk.Label(app, image=photo)
-titre_label.grid(row=0, column=0, columnspan=2, pady=10)
+titre_label.grid(row=0, column=0, columnspan=3, pady=10)
 
 feuille_id_label = tk.Label(app, text="Sélectionner la feuille :")
 feuille_id_label.grid(row=1, column=0, padx=10, pady=10)
