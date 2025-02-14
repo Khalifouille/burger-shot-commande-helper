@@ -15,8 +15,8 @@ client = gspread.authorize(creds)
 fichier = None
 
 fichiers_ids = {
-    "Ventes civil": "1AbG1Cbei_ny33IFpC5Hyi2LkU00xe84xTQNsnVFUoVY",
-    "Ventes contrat": "1g9VhwRx2rSETvsjwtHBuHDUkrsJLxyUnelVLujEx1xs"
+    "Ventes civil": "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto",
+    "Ventes contrat": "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU"
 }
 
 def get_sheet_names():
@@ -160,8 +160,8 @@ def charger_fichier():
     fichier_id = fichiers_ids[feuille_id_combobox.get()]
     
     fichiers_valides = {
-        "1AbG1Cbei_ny33IFpC5Hyi2LkU00xe84xTQNsnVFUoVY": afficher_elements,
-        "1g9VhwRx2rSETvsjwtHBuHDUkrsJLxyUnelVLujEx1xs": afficher_elements2
+        "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto": afficher_elements,
+        "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU": afficher_elements2
     }
 
     try:
@@ -212,12 +212,14 @@ def afficher_elements2():
     masquer_tous_les_elements()
     nom2_label.grid(row=2, column=0, padx=15, pady=10, sticky="w")
     nom2_entry.grid(row=2, column=1, padx=15, pady=10, columnspan=2)
-    client_label.grid(row=3, column=0, padx=15, pady=10, sticky="w")
-    client_entry.grid(row=3, column=1, padx=15, pady=10, columnspan=2)
-    date_label.grid(row=4, column=0, padx=15, pady=10, sticky="w")
-    date_entry.grid(row=4, column=1, padx=15, pady=10, columnspan=2)
-    confirmer_button2.grid(row=5, column=0, columnspan=3, padx=15, pady=15)
-    resultat_label.grid(row=6, column=0, columnspan=3, padx=15, pady=10)
+    feuille_label.grid(row=3, column=0, padx=15, pady=10, sticky="w")
+    feuille_combobox.grid(row=3, column=1, padx=15, pady=10, columnspan=2)
+    client_label.grid(row=4, column=0, padx=15, pady=10, sticky="w")
+    client_entry.grid(row=4, column=1, padx=15, pady=10, columnspan=2)
+    date_label.grid(row=5, column=0, padx=15, pady=10, sticky="w")
+    date_entry.grid(row=5, column=1, padx=15, pady=10, columnspan=2)
+    confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
+    resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
 
 def masquer_elements():
     nom_label.grid_remove()
@@ -304,7 +306,7 @@ photo = ImageTk.PhotoImage(image)
 titre_label = tk.Label(app, image=photo)
 titre_label.grid(row=0, column=0, columnspan=3, pady=10)
 
-feuille_id_label = tk.Label(app, text="Sélectionner la feuille :")
+feuille_id_label = tk.Label(app, text="Sélectionner le GSheet :")
 feuille_id_label.grid(row=1, column=0, padx=10, pady=10)
 feuille_id_combobox = ttk.Combobox(app, values=list(fichiers_ids.keys()))
 feuille_id_combobox.grid(row=1, column=1, padx=10, pady=10)
