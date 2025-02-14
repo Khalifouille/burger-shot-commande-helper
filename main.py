@@ -115,14 +115,12 @@ def confirmer_vente2():
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
-
         valeurs = {
             "B": str(nom2_entry.get()),     # Vendeur
             "D": str(client_entry.get()),   # Client
             "E": date_aujourdhui,           # Date du jour
             "F": "TRUE"                     # Case à cocher
         }
-
         ligne = trouver_premiere_ligne_vide(sheet)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
@@ -138,10 +136,14 @@ def confirmer_vente2():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+
 def ajouter_client():
-    client_entry.delete(0, tk.END)
-    date_entry.set_date(datetime.datetime.now())
-    resultat_label.config(text="Prêt pour un nouveau client.")
+    client_label2 = tk.Label(app, text="Client :")
+    client_entry2 = tk.Entry(app)
+    client_label2.grid(row=len(client_entry.winfo_children())+5, column=0, padx=10, pady=10)
+    client_entry2.grid(row=len(client_entry.winfo_children())+5, column=1, padx=10, pady=10)
+    client_entry2.focus()
+
 
 def enregistrer_vente():
     global fichier
