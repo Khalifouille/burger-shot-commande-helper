@@ -111,14 +111,13 @@ def confirmer_vente2():
     try:
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
-
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
 
         valeurs = {
-            "B": str(nom2_entry.get()),     # Vendeur 
-            "D": str(client_entry.get()),   # Client 
+            "B": str(nom2_entry.get()),     # Vendeur
+            "D": str(client_entry.get()),   # Client
             "E": date_aujourdhui,           # Date du jour
-            "F": True,                      # Case à cocher
+            "F": "TRUE"                     # Case à cocher
         }
 
         ligne = trouver_premiere_ligne_vide(sheet)
@@ -129,6 +128,8 @@ def confirmer_vente2():
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
+
+
 
 def enregistrer_vente():
     global fichier
@@ -204,11 +205,9 @@ def afficher_elements():
 
 def afficher_elements2():
     date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
-    case_a_cocher_var = tk.BooleanVar(value=True)
-    case_a_cocher = tk.Checkbutton(app, text="Case à cocher", variable=case_a_cocher_var)
     elements_a_afficher = [
         feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
-        date_label, date_entry, confirmer_button2, resultat_label, case_a_cocher
+        date_label, date_entry, confirmer_button2, resultat_label
     ]
     for elem in elements_a_afficher:
         elem.grid()
@@ -290,10 +289,10 @@ charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
 
-nom2_label = tk.Label(app, text="Votre nom :")
+nom2_label = tk.Label(app, text="Vendeur :")
 nom2_entry = tk.Entry(app)
 
-client_label = tk.Label(app, text="Nom du Client :")
+client_label = tk.Label(app, text="Client :")
 client_entry = tk.Entry(app)
 
 date_label = tk.Label(app, text="Date :")
