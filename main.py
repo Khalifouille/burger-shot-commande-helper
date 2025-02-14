@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from tkcalendar import DateEntry
-import tkinter as tk
 from PIL import Image, ImageTk
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -14,6 +13,11 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
 client = gspread.authorize(creds)
 
 fichier = None
+
+fichiers_ids = {
+    "Ventes civil": "1AbG1Cbei_ny33IFpC5Hyi2LkU00xe84xTQNsnVFUoVY",
+    "Ventes contrat": "1g9VhwRx2rSETvsjwtHBuHDUkrsJLxyUnelVLujEx1xs"
+}
 
 def get_sheet_names():
     global fichier
@@ -38,7 +42,6 @@ def trouver_premiere_ligne_vide(sheet):
     except Exception as e:
         print(f"Erreur lors de la recherche de la première cellule vide de la colonne B : {e}")
         return None
-
 
 def trouver_ligne(sheet, nom):
     try:
@@ -129,8 +132,6 @@ def confirmer_vente2():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
-
-
 def enregistrer_vente():
     global fichier
     try:
@@ -153,11 +154,9 @@ def enregistrer_vente():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
-
-
 def charger_fichier():
     global fichier
-    fichier_id = fichier_id_entry.get()
+    fichier_id = fichiers_ids[feuille_id_combobox.get()]
     
     fichiers_valides = {
         "1AbG1Cbei_ny33IFpC5Hyi2LkU00xe84xTQNsnVFUoVY": afficher_elements,
@@ -212,8 +211,6 @@ def afficher_elements2():
     for elem in elements_a_afficher:
         elem.grid()
 
-
-
 def masquer_elements():
     nom_label.grid_remove()
     nom_entry.grid_remove()
@@ -246,7 +243,7 @@ def sauvegarder_preferences():
     preferences = {
         "nom": nom_entry.get(),
         "feuille": feuille_combobox.get(),
-        "fichier_id": fichier_id_entry.get()
+        "fichier_id": feuille_id_combobox.get()
     }
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
     if not os.path.exists(dossier_preferences):
@@ -263,7 +260,7 @@ def charger_preferences():
             preferences = json.load(f)
             nom_entry.insert(0, preferences.get("nom", ""))
             feuille_combobox.set(preferences.get("feuille", ""))
-            fichier_id_entry.insert(0, preferences.get("fichier_id", ""))
+            feuille_id_combobox.set(preferences.get("fichier_id", ""))
     except FileNotFoundError:
         pass
 
@@ -278,10 +275,11 @@ photo = ImageTk.PhotoImage(image)
 titre_label = tk.Label(app, image=photo)
 titre_label.grid(row=0, column=0, columnspan=2, pady=10)
 
-fichier_id_label = tk.Label(app, text="ID GSheets :")
-fichier_id_label.grid(row=1, column=0, padx=10, pady=10)
-fichier_id_entry = tk.Entry(app)
-fichier_id_entry.grid(row=1, column=1, padx=10, pady=10)
+feuille_id_label = tk.Label(app, text="Sélectionner la feuille :")
+feuille_id_label.grid(row=1, column=0, padx=10, pady=10)
+feuille_id_combobox = ttk.Combobox(app, values=list(fichiers_ids.keys()))
+feuille_id_combobox.grid(row=1, column=1, padx=10, pady=10)
+feuille_id_combobox.current(0)
 
 charger_fichier_button = tk.Button(app, text="Charger le fichier", command=charger_fichier)
 charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
