@@ -180,7 +180,12 @@ def charger_fichier():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+def masquer_tous_les_elements():
+    masquer_elements()
+    masquer_elements2()
+
 def afficher_elements():
+    masquer_tous_les_elements()
     nom_label.grid(row=2, column=0, padx=10, pady=10)
     nom_entry.grid(row=2, column=1, padx=10, pady=10)
     feuille_label.grid(row=3, column=0, padx=10, pady=10)
@@ -203,7 +208,7 @@ def afficher_elements():
     resultat_label.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
 
 def afficher_elements2():
-    date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
+    masquer_tous_les_elements()
     elements_a_afficher = [
         feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
         date_label, date_entry, confirmer_button2, resultat_label
@@ -294,7 +299,7 @@ client_label = tk.Label(app, text="Client :")
 client_entry = tk.Entry(app)
 
 date_label = tk.Label(app, text="Date :")
-date_entry = tk.Entry(app)
+date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
 
 feuille_label = tk.Label(app, text="Sélectionner la feuille :")
 feuille_combobox = ttk.Combobox(app, values=[])
