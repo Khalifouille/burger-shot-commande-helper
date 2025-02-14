@@ -43,6 +43,7 @@ def trouver_premiere_ligne_vide(sheet):
         print(f"Erreur lors de la recherche de la première cellule vide de la colonne B : {e}")
         return None
 
+
 def trouver_ligne(sheet, nom):
     try:
         lignes = sheet.get_all_values()
@@ -266,6 +267,15 @@ def charger_preferences():
             nom_entry.insert(0, preferences.get("nom", ""))
             feuille_combobox.set(preferences.get("feuille", ""))
             feuille_id_combobox.set(preferences.get("fichier_id", ""))
+            fichier_id = preferences.get("fichier_id", "")
+            if fichier_id and fichier_id in fichiers_ids:
+                fichier = client.open_by_key(fichiers_ids[fichier_id])
+                feuilles = get_sheet_names()
+                feuille_combobox["values"] = feuilles
+                feuille_combobox.set(preferences.get("feuille", ""))
+            else:
+                fichier = None
+
     except FileNotFoundError:
         pass
 
