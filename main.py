@@ -34,9 +34,9 @@ def get_sheet_names():
 
 def trouver_premiere_ligne_vide(sheet):
     try:
-        colonnes_b = sheet.col_values(2) 
-        for i, valeur in enumerate(colonnes_b, start=1):  
-            if not valeur:  
+        colonnes_b = sheet.col_values(4)
+        for i, valeur in enumerate(colonnes_b[5:], start=6):  
+            if not valeur: 
                 return i
         return len(colonnes_b) + 1 
     except Exception as e:
