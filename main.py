@@ -6,6 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
 
+# Autorisation de l'API Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
 client = gspread.authorize(creds)
@@ -30,7 +31,6 @@ def trouver_ligne(sheet, nom):
         for i, ligne in enumerate(lignes):
             if nom in ligne:
                 return i + 1  
-
         print(f"Erreur : {nom} non trouvé dans la feuille.")
         return None
     except Exception as e:
@@ -90,7 +90,15 @@ def charger_fichier():
             fichier = client.open_by_key(fichier_id)
             feuilles = get_sheet_names()
             feuille_combobox["values"] = feuilles
-            if feuilles: 
+            if feuilles:
+                feuille_combobox.current(0)
+            resultat_label.config(text="Fichier chargé avec succès !")
+            afficher_elements()
+        elif fichier_id == "1g9VhwRx2rSETvsjwtHBuHDUkrsJLxyUnelVLujEx1xs":
+            fichier = client.open_by_key(fichier_id)
+            feuilles = get_sheet_names()
+            feuille_combobox["values"] = feuilles
+            if feuilles:
                 feuille_combobox.current(0)
             resultat_label.config(text="Fichier chargé avec succès !")
             afficher_elements()
@@ -99,30 +107,6 @@ def charger_fichier():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
-def sauvegarder_preferences():
-    preferences = {
-        "nom": nom_entry.get(),
-        "feuille": feuille_combobox.get(),
-        "fichier_id": fichier_id_entry.get()
-    }
-    dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
-    if not os.path.exists(dossier_preferences):
-        os.makedirs(dossier_preferences)
-    chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
-    with open(chemin_fichier, "w") as f:
-        json.dump(preferences, f)
-
-def charger_preferences():
-    dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
-    chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
-    try:
-        with open(chemin_fichier, "r") as f:
-            preferences = json.load(f)
-            nom_entry.insert(0, preferences.get("nom", ""))
-            feuille_combobox.set(preferences.get("feuille", ""))
-            fichier_id_entry.insert(0, preferences.get("fichier_id", ""))
-    except FileNotFoundError:
-        pass
 
 def afficher_elements():
     nom_label.grid(row=2, column=0, padx=10, pady=10)
@@ -167,6 +151,31 @@ def masquer_elements():
     milkshake_combobox.grid_remove()
     confirmer_button.grid_remove()
     resultat_label.grid_remove()
+
+def sauvegarder_preferences():
+    preferences = {
+        "nom": nom_entry.get(),
+        "feuille": feuille_combobox.get(),
+        "fichier_id": fichier_id_entry.get()
+    }
+    dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
+    if not os.path.exists(dossier_preferences):
+        os.makedirs(dossier_preferences)
+    chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
+    with open(chemin_fichier, "w") as f:
+        json.dump(preferences, f)
+
+def charger_preferences():
+    dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
+    chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
+    try:
+        with open(chemin_fichier, "r") as f:
+            preferences = json.load(f)
+            nom_entry.insert(0, preferences.get("nom", ""))
+            feuille_combobox.set(preferences.get("feuille", ""))
+            fichier_id_entry.insert(0, preferences.get("fichier_id", ""))
+    except FileNotFoundError:
+        pass
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -217,7 +226,7 @@ boisson_label = tk.Label(app, text="Boisson:")
 boisson_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 boisson_combobox.current(0)
 
-milkshake_label = tk.Label(app, text="MilkShake:")
+milkshake_label = tk.Label(app, text="Milkshake:")
 milkshake_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 milkshake_combobox.current(0)
 
@@ -225,10 +234,7 @@ confirmer_button = tk.Button(app, text="Confirmer la vente", command=confirmer_v
 
 resultat_label = tk.Label(app, text="")
 
-masquer_elements()
+sauvegarder_preferences_button = tk.Button(app, text="Sauvegarder les préférences", command=sauvegarder_preferences)
 
 charger_preferences()
-
-app.protocol("WM_DELETE_WINDOW", lambda: [sauvegarder_preferences(), app.quit()])
-
 app.mainloop()
