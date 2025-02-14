@@ -30,12 +30,11 @@ def get_sheet_names():
 
 def trouver_premiere_ligne_vide(sheet):
     try:
-        # Récupérer toutes les valeurs de la colonne B
-        colonnes_b = sheet.col_values(2)  # Colonne B est la colonne 2 (en partant de 1)
+        colonnes_b = sheet.col_values(2) 
         for i, valeur in enumerate(colonnes_b, start=1):  
-            if not valeur:  # Vérifie si la cellule est vide
+            if not valeur:  
                 return i
-        return len(colonnes_b) + 1  # Si aucune cellule vide n'est trouvée, retourne la prochaine ligne
+        return len(colonnes_b) + 1 
     except Exception as e:
         print(f"Erreur lors de la recherche de la première cellule vide de la colonne B : {e}")
         return None
@@ -112,15 +111,14 @@ def confirmer_vente2():
     try:
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
-        votre_nom = nom_entry.get()
 
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
 
         valeurs = {
-            "B": str(menu_classic_combobox.get()),  # Vendeur (string)
-            "D": str(menu_double_combobox.get()),   # Client (string)
-            "E": date_aujourdhui,                   # Date du jour
-            "F": True,                              # Case à cocher (toujours True)
+            "B": str(nom2_entry.get()),     # Vendeur 
+            "D": str(client_entry.get()),   # Client 
+            "E": date_aujourdhui,           # Date du jour
+            "F": True,                      # Case à cocher
         }
 
         ligne = trouver_premiere_ligne_vide(sheet)
@@ -138,19 +136,22 @@ def enregistrer_vente():
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
         ligne_vide = trouver_premiere_ligne_vide(sheet)
+        
         if ligne_vide:
-            vendeur = nom_entry.get()
-            client = client_entry.get()
-            date = date_entry.get()
+            vendeur = str(nom2_entry.get()).strip()
+            client = str(client_entry.get()).strip()
+            date = str(date_entry.get()).strip()
             valider = "✅"
-            
-            # Insérer les données dans la première ligne vide de la colonne B
-            sheet.insert_row([vendeur, client, date, valider], ligne_vide)
-            resultat_label.config(text="Vente enregistrée avec succès !")
+            if vendeur and client and date:
+                sheet.insert_row([vendeur, client, date, valider], ligne_vide)
+                resultat_label.config(text="Vente enregistrée avec succès !")
+            else:
+                resultat_label.config(text="Erreur : Veuillez remplir tous les champs.")
         else:
             resultat_label.config(text="Erreur : Impossible de trouver une ligne vide.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
+
 
 
 def charger_fichier():
@@ -202,20 +203,13 @@ def afficher_elements():
     resultat_label.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
 
 def afficher_elements2():
-    # Création du widget DateEntry pour afficher la date sous forme de date
     date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
-
-    # Création du Checkbutton pour la case à cocher, avec la valeur True
     case_a_cocher_var = tk.BooleanVar(value=True)
     case_a_cocher = tk.Checkbutton(app, text="Case à cocher", variable=case_a_cocher_var)
-
-    # Liste des éléments à afficher
     elements_a_afficher = [
         feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
         date_label, date_entry, confirmer_button2, resultat_label, case_a_cocher
     ]
-    
-    # Affichage des éléments
     for elem in elements_a_afficher:
         elem.grid()
 
