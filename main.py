@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
 from PIL import Image, ImageTk
 import gspread
@@ -42,7 +42,6 @@ def trouver_premiere_ligne_vide(sheet):
     except Exception as e:
         print(f"Erreur lors de la recherche de la première cellule vide de la colonne B : {e}")
         return None
-
 
 def trouver_ligne(sheet, nom):
     try:
@@ -105,6 +104,12 @@ def confirmer_vente():
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
+            reponse = messagebox.askyesno("Ajouter un autre client", "Voulez-vous ajouter un autre client ?")
+            if reponse:
+                ajouter_client()
+            else:
+                client_entry.delete(0, tk.END)
+                date_entry.set_date(datetime.datetime.now())
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
@@ -128,10 +133,21 @@ def confirmer_vente2():
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
+            reponse = messagebox.askyesno("Ajouter un autre client", "Voulez-vous ajouter un autre client ?")
+            if reponse:
+                ajouter_client()
+            else:
+                client_entry.delete(0, tk.END)
+                date_entry.set_date(datetime.datetime.now())
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
+
+def ajouter_client():
+    client_entry.delete(0, tk.END)
+    date_entry.set_date(datetime.datetime.now())
+    resultat_label.config(text="Prêt pour un nouveau client.")
 
 def enregistrer_vente():
     global fichier
@@ -148,6 +164,12 @@ def enregistrer_vente():
             if vendeur and client and date:
                 sheet.insert_row([vendeur, client, date, valider], ligne_vide)
                 resultat_label.config(text="Vente enregistrée avec succès !")
+                reponse = messagebox.askyesno("Ajouter un autre client", "Voulez-vous ajouter un autre client ?")
+                if reponse:
+                    ajouter_client()
+                else:
+                    client_entry.delete(0, tk.END)
+                    date_entry.set_date(datetime.datetime.now())
             else:
                 resultat_label.config(text="Erreur : Veuillez remplir tous les champs.")
         else:
@@ -206,7 +228,8 @@ def afficher_elements():
     milkshake_label.grid(row=10, column=0, padx=10, pady=10)
     milkshake_combobox.grid(row=10, column=1, padx=10, pady=10)
     confirmer_button.grid(row=11, column=0, columnspan=3, padx=10, pady=10)
-    resultat_label.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
+    ajouter_client_button.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
+    resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
 
 def afficher_elements2():
     masquer_tous_les_elements()
@@ -219,33 +242,21 @@ def afficher_elements2():
     date_label.grid(row=5, column=0, padx=15, pady=10, sticky="w")
     date_entry.grid(row=5, column=1, padx=15, pady=10, columnspan=2)
     confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
-    resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
+    ajouter_client_button.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
+    resultat_label.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
 
 def masquer_elements():
-    nom_label.grid_remove()
-    nom_entry.grid_remove()
-    feuille_label.grid_remove()
-    feuille_combobox.grid_remove()
-    menu_classic_label.grid_remove()
-    menu_classic_combobox.grid_remove()
-    menu_double_label.grid_remove()
-    menu_double_combobox.grid_remove()
-    menu_contrat_label.grid_remove()
-    menu_contrat_combobox.grid_remove()
-    tenders_label.grid_remove()
-    tenders_combobox.grid_remove()
-    petite_salade_label.grid_remove()
-    petite_salade_combobox.grid_remove()
-    boisson_label.grid_remove()
-    boisson_combobox.grid_remove()
-    milkshake_label.grid_remove()
-    milkshake_combobox.grid_remove()
-    confirmer_button.grid_remove()
-    resultat_label.grid_remove()
+    elements_a_cacher = [nom_label, nom_entry, feuille_label, feuille_combobox, menu_classic_label, menu_classic_combobox,
+                         menu_double_label, menu_double_combobox, menu_contrat_label, menu_contrat_combobox,
+                         tenders_label, tenders_combobox, petite_salade_label, petite_salade_combobox,
+                         boisson_label, boisson_combobox, milkshake_label, milkshake_combobox, confirmer_button,
+                         ajouter_client_button, resultat_label]
+    for elem in elements_a_cacher:
+        elem.grid_remove()
 
 def masquer_elements2():
     elements_a_cacher = [feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
-                         date_label, date_entry, confirmer_button2, resultat_label]
+                         date_label, date_entry, confirmer_button2, ajouter_client_button, resultat_label]
     for elem in elements_a_cacher:
         elem.grid_remove()
 
@@ -254,7 +265,7 @@ def sauvegarder_preferences():
         "nom": nom_entry.get(),
         "feuille": feuille_combobox.get(),
         "fichier_id": feuille_id_combobox.get(),
-        "vendeur" : nom2_entry.get(),
+        "vendeur": nom2_entry.get(),
     }
 
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
@@ -293,7 +304,6 @@ def charger_preferences():
         print("Fichier de préférences non trouvé.")
     except Exception as e:
         print(f"Erreur lors du chargement des préférences : {e}")
-
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -361,6 +371,8 @@ milkshake_combobox.current(0)
 confirmer_button = tk.Button(app, text="Confirmer la vente", command=confirmer_vente)
 
 confirmer_button2 = tk.Button(app, text="Confirmer la vente", command=confirmer_vente2)
+
+ajouter_client_button = tk.Button(app, text="Ajouter un autre client", command=ajouter_client)
 
 sauvegarder_preferences_button = tk.Button(app, text="Sauvegarder les préférences", command=sauvegarder_preferences)
 sauvegarder_preferences_button.grid(row=13, column=0, columnspan=3, padx=10, pady=10) 
