@@ -99,11 +99,17 @@ def confirmer_vente():
             "I": int(boisson_combobox.get()),  # Boisson
             "J": int(milkshake_combobox.get()),  # MilkShake
         }
-
         ligne = trouver_ligne(sheet, votre_nom)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
+            menu_classic_combobox.set(0)
+            menu_double_combobox.set(0)
+            menu_contrat_combobox.set(0)
+            tenders_combobox.set(0)
+            petite_salade_combobox.set(0)
+            boisson_combobox.set(0)
+            milkshake_combobox.set(0)
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
