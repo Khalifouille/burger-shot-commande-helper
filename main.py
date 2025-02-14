@@ -104,12 +104,6 @@ def confirmer_vente():
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
-            reponse = messagebox.askyesno("Ajouter un autre client", "Voulez-vous ajouter un autre client ?")
-            if reponse:
-                ajouter_client()
-            else:
-                client_entry.delete(0, tk.END)
-                date_entry.set_date(datetime.datetime.now())
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
@@ -228,8 +222,7 @@ def afficher_elements():
     milkshake_label.grid(row=10, column=0, padx=10, pady=10)
     milkshake_combobox.grid(row=10, column=1, padx=10, pady=10)
     confirmer_button.grid(row=11, column=0, columnspan=3, padx=10, pady=10)
-    ajouter_client_button.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
-    resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
+    resultat_label.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
 
 def afficher_elements2():
     masquer_tous_les_elements()
@@ -250,7 +243,7 @@ def masquer_elements():
                          menu_double_label, menu_double_combobox, menu_contrat_label, menu_contrat_combobox,
                          tenders_label, tenders_combobox, petite_salade_label, petite_salade_combobox,
                          boisson_label, boisson_combobox, milkshake_label, milkshake_combobox, confirmer_button,
-                         ajouter_client_button, resultat_label]
+                         resultat_label]
     for elem in elements_a_cacher:
         elem.grid_remove()
 
