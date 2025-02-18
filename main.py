@@ -196,7 +196,50 @@ def confirmer_vente2():
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
 
-            envoyer_webhook_discord(info_vente)
+            embed = {
+                "title": "✅ Nouvelle vente [CONTRATS]",
+                "color": 0x00FF00,  
+                "fields": [
+                    {
+                        "name": "Vendeur",
+                        "value": info_vente["vendeur"],
+                        "inline": True
+                    },
+                    {
+                        "name": "Client",
+                        "value": info_vente["client"],
+                        "inline": True
+                    },
+                    {
+                        "name": "Date de la vente",
+                        "value": info_vente["date"],
+                        "inline": False
+                    },
+                    {
+                        "name": "Feuille de calcul",
+                        "value": info_vente["feuille"],
+                        "inline": True
+                    },
+                    {
+                        "name": "Date et heure",
+                        "value": info_vente["date_heure"],
+                        "inline": True
+                    }
+                ],
+                "footer": {
+                    "text": "Assistant Khalifouille"
+                },
+                "timestamp": info_vente["date_heure"]
+            }
+
+            data = {
+                "embeds": [embed]
+            }
+
+            headers = {"Content-Type": "application/json"}
+            response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+            if response.status_code != 204:
+                print(f"Erreur lors de l'envoi du webhook : {response.status_code}")
 
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
