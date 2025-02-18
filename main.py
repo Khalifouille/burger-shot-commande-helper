@@ -120,6 +120,7 @@ def confirmer_vente():
             petite_salade_combobox.set(0)
             boisson_combobox.set(0)
             milkshake_combobox.set(0)
+            calculer_prix_total()
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
@@ -221,7 +222,7 @@ def afficher_elements():
     boisson_combobox.grid(row=9, column=1, padx=10, pady=10)
     milkshake_label.grid(row=10, column=0, padx=10, pady=10)
     milkshake_combobox.grid(row=10, column=1, padx=10, pady=10)
-    prix_total_label.grid(row=11, column=0, columnspan=2, padx=10, pady=10)
+    prix_total_label.grid(row=11, column=0, columnspan=3, padx=10, pady=10)
     confirmer_button.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
 
