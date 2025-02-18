@@ -198,7 +198,14 @@ def confirmer_vente2():
 
             embed = {
                 "title": "✅ Nouvelle vente [CONTRATS]",
-                "color": 0x00FF00,  
+                "color": 0x00FF00,
+                "author": {
+                    "name": "Burger Shot - Ventes",
+                    "icon_url": "https://imgur.com/a/W1KmFQu" 
+                },
+                "image": {
+                    "url": "https://imgur.com/a/8jme6fD"
+                },
                 "fields": [
                     {
                         "name": "Vendeur",
@@ -227,7 +234,7 @@ def confirmer_vente2():
                     }
                 ],
                 "footer": {
-                    "text": "Assistant Khalifouille"
+                    "text": "Système de gestion des ventes"
                 },
                 "timestamp": info_vente["date_heure"]
             }
@@ -238,6 +245,7 @@ def confirmer_vente2():
 
             headers = {"Content-Type": "application/json"}
             response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+
             if response.status_code != 204:
                 print(f"Erreur lors de l'envoi du webhook : {response.status_code}")
 
