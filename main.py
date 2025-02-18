@@ -60,7 +60,7 @@ def sauvegarder_vente_json(info_vente):
         print(f"Erreur lors de la sauvegarde de la vente : {e}")
 
 def envoyer_webhook_discord(info_vente):
-    
+
     message = {
         "content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"
     }
@@ -151,6 +151,17 @@ def confirmer_vente():
             boisson_combobox.set(0)
             milkshake_combobox.set(0)
             calculer_prix_total()
+
+            info_vente = {
+                "vendeur": votre_nom,
+                "feuille": nom_feuille,
+                "valeurs": valeurs,
+                "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+
+            sauvegarder_vente_json(info_vente)
+            envoyer_webhook_discord(info_vente)
+
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
@@ -174,6 +185,18 @@ def confirmer_vente2():
             resultat_label.config(text="Vente enregistrée avec succès !")
             client_entry.delete(0, tk.END)
             date_entry.set_date(datetime.datetime.now())
+
+            info_vente = {
+                "vendeur": nom2_entry.get(),
+                "client": client_entry.get(),
+                "date": date_aujourdhui,
+                "feuille": nom_feuille,
+                "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            
+            sauvegarder_vente_json(info_vente)
+            envoyer_webhook_discord(info_vente)
+
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
