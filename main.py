@@ -168,12 +168,19 @@ def confirmer_vente2():
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
+        client_nom = client_entry.get().strip()
+
+        if not client_nom:
+            resultat_label.config(text="Erreur : Le champ 'Client' est vide.")
+            return
+
         valeurs = {
             "B": str(nom2_entry.get()),     # Vendeur
-            "D": str(client_entry.get()),   # Client
+            "D": client_nom,                # Client
             "E": date_aujourdhui,           # Date du jour
             "F": "TRUE"                     # Case à cocher
         }
+
         ligne = trouver_premiere_ligne_vide(sheet)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
@@ -183,7 +190,7 @@ def confirmer_vente2():
 
             info_vente = {
                 "vendeur": nom2_entry.get(),
-                "client": client_entry.get(),
+                "client": client_nom,      
                 "date": date_aujourdhui,
                 "feuille": nom_feuille,
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
