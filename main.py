@@ -149,12 +149,50 @@ def confirmer_vente():
             }
 
             valeurs_nommees = {menu_mapping[k]: v for k, v in valeurs.items() if v > 0}
+
             if valeurs_nommees:
-                message = "\n".join([f"- **{k} :** {v}" for k, v in valeurs_nommees.items()])
-                data = {
-                    "content": f"**Nouvelle vente confirmée par {votre_nom} !**\n{message}\n📅 {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                embed = {
+                "title": "🟢 Nouvelle vente [CIVILS]",
+                "color": 0x00FF00,
+                "author": {
+                    "name": "Burger Shot - NoFace",
+                    "icon_url": "https://i.postimg.cc/HLw6hBVh/bs-pp.png" 
+                },
+                "image": {
+                    "url": "https://i.postimg.cc/DfjBHWwn/banner.jpg"
+                },
+                "fields": [
+                    {
+                        "name": "Vendeur",
+                        "value": votre_nom,
+                        "inline": True
+                    },
+                    {
+                            "name": "Date et heure",
+                            "value": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                            "inline": True
+                        },
+                        {
+                            "name": "Détails de la vente",
+                            "value": "\n".join([f"- **{k} :** {v}" for k, v in valeurs_nommees.items()]),
+                            "inline": False
+                        }
+                    ],
+                    "footer": {
+                        "text": "Système de gestion des ventes"
+                    },
+                    "timestamp": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
-                requests.post(webhook_url, json=data)
+
+                data = {
+                    "embeds": [embed]
+                }
+
+                headers = {"Content-Type": "application/json"}
+                response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+
+                if response.status_code != 204:
+                    print(f"Erreur lors de l'envoi du webhook : {response.status_code}")
 
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
@@ -197,14 +235,14 @@ def confirmer_vente2():
             }
 
             embed = {
-                "title": "✅ Nouvelle vente [CONTRATS]",
+                "title": "🟢 Nouvelle vente [CONTRATS]",
                 "color": 0x00FF00,
                 "author": {
-                    "name": "Burger Shot - Ventes",
-                    "icon_url": "https://imgur.com/a/W1KmFQu" 
+                    "name": "Burger Shot - NoFace",
+                    "icon_url": "https://i.postimg.cc/HLw6hBVh/bs-pp.png" 
                 },
                 "image": {
-                    "url": "https://imgur.com/a/8jme6fD"
+                    "url": "https://i.postimg.cc/DfjBHWwn/banner.jpg"
                 },
                 "fields": [
                     {
@@ -223,7 +261,7 @@ def confirmer_vente2():
                         "inline": False
                     },
                     {
-                        "name": "Feuille de calcul",
+                        "name": "Organisme",
                         "value": info_vente["feuille"],
                         "inline": True
                     },
