@@ -174,7 +174,7 @@ def enregistrer_vente():
 
 def charger_fichier():
     global fichier
-    fichier_id = feuille_id_combobox.get()
+    fichier_id = fichiers_ids[feuille_id_combobox.get()]
     
     fichiers_valides = {
         "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto": afficher_elements,
@@ -182,26 +182,24 @@ def charger_fichier():
     }
 
     try:
-        if fichier_id and fichier_id in fichiers_ids:
-            try:
-                fichier = client.open_by_key(fichiers_ids[fichier_id])
-                feuilles = get_sheet_names()
-                
-                feuille_combobox["values"] = feuilles
-                feuille_a_selectionner = feuille_combobox.get() 
-                if feuille_a_selectionner in feuilles:
-                    feuille_combobox.set(feuille_a_selectionner)
-                else:
-                    print("⚠️ La feuille précédente n'existe pas, sélection automatique de la première feuille.")
-                    feuille_combobox.set(feuilles[0])      
-                print(f"Feuille sélectionnée après chargement : {feuille_combobox.get()}")
-            except Exception as e:
-                print(f"Erreur lors du chargement du fichier : {e}")
+        if fichier_id in fichiers_valides:
+            fichier = client.open_by_key(fichier_id)
+            feuilles = get_sheet_names()
+            feuille_combobox["values"] = feuilles  
+            feuille_a_selectionner = feuille_combobox.get()
+            if feuille_a_selectionner in feuilles:
+                feuille_combobox.set(feuille_a_selectionner)
+            else:
+                feuille_combobox.current(0)
+
+            resultat_label.config(text="Fichier chargé avec succès !")
+            fichiers_valides[fichier_id]()  
         else:
-            print("⚠️ Aucun fichier sélectionné ou fichier introuvable.")
+            resultat_label.config(text="Erreur : ID de fichier invalide.")
     
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
+
 
 def masquer_tous_les_elements():
     masquer_elements()
