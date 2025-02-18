@@ -129,6 +129,9 @@ def confirmer_vente():
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
+
+            prix_total = calculer_prix_total()
+
             menu_classic_combobox.set(0)
             menu_double_combobox.set(0)
             menu_contrat_combobox.set(0)
@@ -136,7 +139,6 @@ def confirmer_vente():
             petite_salade_combobox.set(0)
             boisson_combobox.set(0)
             milkshake_combobox.set(0)
-            calculer_prix_total()
 
             menu_mapping = {
                 "D": "Menu Classic",
@@ -176,6 +178,11 @@ def confirmer_vente():
                             "name": "Détails de la vente",
                             "value": "\n".join([f"- **{k} :** {v}" for k, v in valeurs_nommees.items()]),
                             "inline": False
+                        },
+                        {
+                            "name": "Prix total",
+                            "value": f"{prix_total} $",
+                            "inline": True
                         }
                     ],
                     "footer": {
@@ -198,7 +205,6 @@ def confirmer_vente():
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
-
 
 def confirmer_vente2():
     global fichier
@@ -460,8 +466,10 @@ def calculer_prix_total():
         for produit, quantite in quantites.items():
             prix_total += quantite * prix_unitaires[produit]
         prix_total_label.config(text=f"Prix total : {prix_total} €")
+        return prix_total
     except ValueError:
-        prix_total_label.config(text="Prix total : 0 €")
+        prix_total_label.config(text="Prix total : 0 $")
+        return
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
