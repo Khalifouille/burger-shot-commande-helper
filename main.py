@@ -7,6 +7,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
 import datetime
+import requests
+from webhook import webhook_url
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
@@ -56,6 +58,19 @@ def sauvegarder_vente_json(info_vente):
         print(f"Vente sauvegardée dans {chemin_fichier}")
     except Exception as e:
         print(f"Erreur lors de la sauvegarde de la vente : {e}")
+
+def envoyer_webhook_discord(info_vente):
+    
+    message = {
+        "content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"
+    }
+
+    try:
+        response = requests.post(webhook_url, json=message)
+        response.raise_for_status()
+        print("Webhook envoyé avec succès.")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi du webhook : {e}")
 
 def trouver_premiere_ligne_vide(sheet):
     try:
