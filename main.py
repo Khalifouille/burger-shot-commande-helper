@@ -44,21 +44,6 @@ def get_sheet_names():
         print(f"Erreur lors de la récupération des feuilles : {e}")
         return []
 
-def sauvegarder_vente_json(info_vente):
-    dossier_ventes = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "ventes")
-    if not os.path.exists(dossier_ventes):
-        os.makedirs(dossier_ventes)
-
-    date_heure = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    chemin_fichier = os.path.join(dossier_ventes, f"vente_{date_heure}.json")
-
-    try:
-        with open(chemin_fichier, "w") as f:
-            json.dump(info_vente, f, indent=4)
-        print(f"Vente sauvegardée dans {chemin_fichier}")
-    except Exception as e:
-        print(f"Erreur lors de la sauvegarde de la vente : {e}")
-
 def envoyer_webhook_discord(info_vente):
 
     message = {
@@ -193,7 +178,7 @@ def confirmer_vente2():
                 "feuille": nom_feuille,
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
-            
+
             sauvegarder_vente_json(info_vente)
             envoyer_webhook_discord(info_vente)
 
