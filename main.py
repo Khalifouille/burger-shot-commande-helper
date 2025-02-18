@@ -141,23 +141,12 @@ def confirmer_vente2():
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
-            reponse = messagebox.askyesno("Ajouter un autre client", "Voulez-vous ajouter un autre client ?")
-            if reponse:
-                ajouter_client()
-            else:
-                client_entry.delete(0, tk.END)
-                date_entry.set_date(datetime.datetime.now())
+            client_entry.delete(0, tk.END)
+            date_entry.set_date(datetime.datetime.now())
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
-
-def ajouter_client():
-    client_label2 = tk.Label(app, text="Client :")
-    client_entry2 = tk.Entry(app)
-    client_label2.grid(row=len(client_entry.winfo_children())+5, column=0, padx=10, pady=10)
-    client_entry2.grid(row=len(client_entry.winfo_children())+5, column=1, padx=10, pady=10)
-    client_entry2.focus()
 
 def enregistrer_vente():
     global fichier
@@ -174,12 +163,7 @@ def enregistrer_vente():
             if vendeur and client and date:
                 sheet.insert_row([vendeur, client, date, valider], ligne_vide)
                 resultat_label.config(text="Vente enregistrée avec succès !")
-                reponse = messagebox.askyesno("Ajouter un autre client", "Voulez-vous ajouter un autre client ?")
-                if reponse:
-                    ajouter_client()
-                else:
-                    client_entry.delete(0, tk.END)
-                    date_entry.set_date(datetime.datetime.now())
+                date_entry.set_date(datetime.datetime.now())
             else:
                 resultat_label.config(text="Erreur : Veuillez remplir tous les champs.")
         else:
@@ -252,7 +236,6 @@ def afficher_elements2():
     date_label.grid(row=5, column=0, padx=15, pady=10, sticky="w")
     date_entry.grid(row=5, column=1, padx=15, pady=10, columnspan=2)
     confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
-    ajouter_client_button.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
     resultat_label.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
 
 def masquer_elements():
@@ -266,7 +249,7 @@ def masquer_elements():
 
 def masquer_elements2():
     elements_a_cacher = [feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
-                         date_label, date_entry, confirmer_button2, ajouter_client_button, resultat_label]
+                         date_label, date_entry, confirmer_button2, resultat_label]
     for elem in elements_a_cacher:
         elem.grid_remove()
 
@@ -396,14 +379,11 @@ milkshake_label = tk.Label(app, text="Milkshake:")
 milkshake_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 milkshake_combobox.current(0)
 
-# Ajout du label pour afficher le prix total
 prix_total_label = tk.Label(app, text="Prix total : 0 $")
 
 confirmer_button = tk.Button(app, text="Confirmer la vente", command=confirmer_vente)
 
 confirmer_button2 = tk.Button(app, text="Confirmer la vente", command=confirmer_vente2)
-
-ajouter_client_button = tk.Button(app, text="Ajouter un autre client", command=ajouter_client)
 
 sauvegarder_preferences_button = tk.Button(app, text="Sauvegarder les préférences", command=sauvegarder_preferences)
 sauvegarder_preferences_button.grid(row=13, column=0, columnspan=3, padx=10, pady=10) 
