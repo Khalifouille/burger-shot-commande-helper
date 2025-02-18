@@ -124,6 +124,7 @@ def confirmer_vente():
             "I": int(boisson_combobox.get()),  # Boisson
             "J": int(milkshake_combobox.get()),  # MilkShake
         }
+
         ligne = trouver_ligne(sheet, votre_nom)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
@@ -137,20 +138,29 @@ def confirmer_vente():
             milkshake_combobox.set(0)
             calculer_prix_total()
 
-            info_vente = {
-                "vendeur": votre_nom,
-                "feuille": nom_feuille,
-                "valeurs": valeurs,
-                "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            menu_mapping = {
+                "D": "Menu Classic",
+                "E": "Menu Double",
+                "F": "Menu Contrat",
+                "G": "Tenders",
+                "H": "Petite Salade",
+                "I": "Boisson",
+                "J": "MilkShake",
             }
 
-            sauvegarder_vente_json(info_vente)
-            envoyer_webhook_discord(info_vente)
+            valeurs_nommees = {menu_mapping[k]: v for k, v in valeurs.items() if v > 0}
+            if valeurs_nommees:
+                message = "\n".join([f"- **{k} :** {v}" for k, v in valeurs_nommees.items()])
+                data = {
+                    "content": f"**Nouvelle vente confirmée par {votre_nom} !**\n{message}\n📅 {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                }
+                requests.post(webhook_url, json=data)
 
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
+
 
 def confirmer_vente2():
     global fichier
@@ -179,7 +189,6 @@ def confirmer_vente2():
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
 
-            sauvegarder_vente_json(info_vente)
             envoyer_webhook_discord(info_vente)
 
         else:
