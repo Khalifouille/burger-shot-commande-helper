@@ -31,6 +31,8 @@ prix_unitaires = {
     "Milkshake": 40,
 }
 
+VENTES_JSON_PATH = "ventes.json"
+
 def get_sheet_names():
     global fichier
     try:
@@ -124,6 +126,9 @@ def confirmer_vente():
             "I": int(boisson_combobox.get()),  # Boisson
             "J": int(milkshake_combobox.get()),  # MilkShake
         }
+
+        date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
+        sauvegarder_ventes_json(date_aujourdhui, valeurs)
 
         ligne = trouver_ligne(sheet, votre_nom)
         if ligne:
@@ -349,6 +354,32 @@ def charger_fichier():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+def obtenir_bilan_ventes_json():
+    try:
+        if not os.path.exists(VENTES_JSON_PATH):
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+
+        with open(VENTES_JSON_PATH, "r") as f:
+            data = json.load(f)
+
+        if not data:
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+        bilan_window = tk.Toplevel(app)
+        bilan_window.title("Bilan des ventes par jour")
+
+        text_area = tk.Text(bilan_window, wrap=tk.WORD, width=80, height=20)
+        text_area.pack(padx=10, pady=10)
+
+        for date, ventes in data.items():
+            text_area.insert(tk.END, f"Date: {date}\n")
+            for produit, quantite in ventes.items():
+                text_area.insert(tk.END, f"  {produit}: {quantite}\n")
+            text_area.insert(tk.END, "\n")
+
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
 
 def masquer_tous_les_elements():
     masquer_elements()
@@ -427,6 +458,25 @@ def sauvegarder_preferences():
     except Exception as e:
         print(f"Erreur lors de la sauvegarde des préférences : {e}")
 
+def sauvegarder_ventes_json(date, ventes):
+    try:
+        if not os.path.exists(VENTES_JSON_PATH):
+            with open(VENTES_JSON_PATH, "r") as f:
+                data = json.load(f)
+        else:
+            data = {}
+        if date in data:
+            for produit, quantite in ventes.items():
+                data[date][produit] = data[date].get(produit, 0) + quantite
+        else:
+            data[date] = ventes
+        with open(VENTES_JSON_PATH, "w") as f:
+            json.dump(data, f, indent=4)
+
+        print(f"Ventes sauvegardées pour la date {date}.")
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde des ventes : {e}")
+
 def charger_preferences():
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
     chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
@@ -471,51 +521,6 @@ def calculer_prix_total():
         prix_total_label.config(text="Prix total : 0 $")
         return 0
 
-def obtenir_bilan_ventes_par_jour():
-    global fichier
-    try:
-        nom_feuille = feuille_combobox.get()
-        sheet = fichier.worksheet(nom_feuille)
-        lignes = sheet.get_all_values()
-
-        bilan_ventes = {}
-
-        for ligne in lignes[1:]:  
-            date_vente = ligne[4]
-            if date_vente:
-                if date_vente not in bilan_ventes:
-                    bilan_ventes[date_vente] = {
-                        "Menu Classic": 0,
-                        "Menu Double": 0,
-                        "Menu Contrat": 0,
-                        "Tenders": 0,
-                        "Petite Salade": 0,
-                        "Boisson": 0,
-                        "Milkshake": 0,
-                    }
-                bilan_ventes[date_vente]["Menu Classic"] += int(ligne[3])  
-                bilan_ventes[date_vente]["Menu Double"] += int(ligne[4])  
-                bilan_ventes[date_vente]["Menu Contrat"] += int(ligne[5])  
-                bilan_ventes[date_vente]["Tenders"] += int(ligne[6])  
-                bilan_ventes[date_vente]["Petite Salade"] += int(ligne[7]) 
-                bilan_ventes[date_vente]["Boisson"] += int(ligne[8]) 
-                bilan_ventes[date_vente]["Milkshake"] += int(ligne[9])  
-
-        bilan_window = tk.Toplevel(app)
-        bilan_window.title("Bilan des ventes par jour")
-
-        text_area = tk.Text(bilan_window, wrap=tk.WORD, width=80, height=20)
-        text_area.pack(padx=10, pady=10)
-
-        for date, ventes in bilan_ventes.items():
-            text_area.insert(tk.END, f"Date: {date}\n")
-            for produit, quantite in ventes.items():
-                text_area.insert(tk.END, f"  {produit}: {quantite}\n")
-            text_area.insert(tk.END, "\n")
-
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
-
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
@@ -536,7 +541,7 @@ feuille_id_combobox.current(0)
 charger_fichier_button = tk.Button(app, text="Charger le fichier", command=charger_fichier)
 charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
 
-bilan_button = tk.Button(app, text="Afficher le bilan des ventes par jour", command=obtenir_bilan_ventes_par_jour)
+bilan_button = tk.Button(app, text="Afficher le bilan des ventes", command=obtenir_bilan_ventes_json)
 bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
