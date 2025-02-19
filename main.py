@@ -9,6 +9,7 @@ import os
 import datetime
 import requests
 from webhook import webhook_url
+import matplotlib.pyplot as plt
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
@@ -407,6 +408,50 @@ def afficher_ventes_par_date(data, selected_date, text_area):
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de l'affichage des ventes : {e}")
 
+def generer_graphique_ventes():
+    try:
+        if not os.path.exists(VENTES_JSON_PATH):
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+        if os.path.getsize(VENTES_JSON_PATH) == 0:
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+        with open(VENTES_JSON_PATH, "r") as f:
+            data = json.load(f)
+
+        if not data:
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+        
+        dates = sorted(data.keys())  
+        produits = set()  
+
+        for date in dates:
+            produits.update(data[date].keys())
+
+        ventes_par_produit = {produit: [] for produit in produits}
+        for date in dates:
+            for produit in produits:
+                if produit in data[date]:
+                    ventes_par_produit[produit].append(data[date][produit])
+                else:
+                    ventes_par_produit[produit].append(0) 
+
+        plt.figure(figsize=(10, 6))
+        for produit in produits:
+            plt.plot(dates, ventes_par_produit[produit], label=produit, marker='o')
+
+        plt.xlabel("DATE")
+        plt.ylabel("QUANTITE VENDU")
+        plt.title("Ventes de produits/date")
+        plt.xticks(rotation=35) 
+        plt.legend()  
+        plt.tight_layout() 
+        plt.show()  
+
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la génération du graphique : {e}")
+
 def masquer_tous_les_elements():
     masquer_elements()
     masquer_elements2()
@@ -623,6 +668,9 @@ confirmer_button2 = tk.Button(app, text="Confirmer la vente", command=confirmer_
 
 sauvegarder_preferences_button = tk.Button(app, text="Sauvegarder les préférences", command=sauvegarder_preferences)
 sauvegarder_preferences_button.grid(row=13, column=0, columnspan=3, padx=10, pady=10) 
+
+graphique_button = tk.Button(app, text="Générer le graphique des ventes", command=generer_graphique_ventes)
+graphique_button.grid(row=15, column=0, columnspan=3, padx=10, pady=10)
 
 resultat_label = tk.Label(app, text="")
 
