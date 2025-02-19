@@ -1,10 +1,13 @@
 {
     "2025-02-19": {
-        "Menu Contrat": 3,
-        "Menu Double": 6,
-        "Boisson": 12,
+        "Menu Contrat": 8,
+        "Menu Double": 13,
+        "Boisson": 35,
         "Tenders": 5,
         "MilkShake": 5,
-        "Menu Classic": 3
+        "Menu Classic": 31
+    },
+    "2025-02-20": {
+        "MilkShake": 85
     }
 }

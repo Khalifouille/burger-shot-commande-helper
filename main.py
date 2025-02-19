@@ -571,31 +571,31 @@ feuille_label = tk.Label(app, text="Sélectionner la feuille :")
 feuille_combobox = ttk.Combobox(app, values=[])
 
 menu_classic_label = tk.Label(app, text="Menu Classic:")
-menu_classic_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+menu_classic_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
 menu_classic_combobox.current(0)
 
 menu_double_label = tk.Label(app, text="Menu Double:")
-menu_double_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+menu_double_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
 menu_double_combobox.current(0)
 
 menu_contrat_label = tk.Label(app, text="Menu Contrat:")
-menu_contrat_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+menu_contrat_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
 menu_contrat_combobox.current(0)
 
 tenders_label = tk.Label(app, text="Tenders:")
-tenders_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+tenders_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
 tenders_combobox.current(0)
 
 petite_salade_label = tk.Label(app, text="Petite Salade:")
-petite_salade_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+petite_salade_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
 petite_salade_combobox.current(0)
 
 boisson_label = tk.Label(app, text="Boisson:")
-boisson_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+boisson_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
 boisson_combobox.current(0)
 
 milkshake_label = tk.Label(app, text="Milkshake:")
-milkshake_combobox = ttk.Combobox(app, values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+milkshake_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
 milkshake_combobox.current(0)
 
 prix_total_label = tk.Label(app, text="Prix total : 0 $")
