@@ -359,7 +359,9 @@ def obtenir_bilan_ventes_json():
         if not os.path.exists(VENTES_JSON_PATH):
             messagebox.showinfo("Info", "Aucune vente enregistrée.")
             return
-
+        if os.path.getsize(VENTES_JSON_PATH) == 0:
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
         with open(VENTES_JSON_PATH, "r") as f:
             data = json.load(f)
 
@@ -380,7 +382,9 @@ def obtenir_bilan_ventes_json():
                 for produit, quantite in ventes.items():
                     text_area.insert(tk.END, f"  {produit}: {quantite}\n")
             text_area.insert(tk.END, "\n")
-
+            
+    except json.JSONDecodeError:
+        messagebox.showerror("Erreur", "Le fichier de ventes est vide ou corrompu.")
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
 
