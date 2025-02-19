@@ -31,7 +31,7 @@ prix_unitaires = {
     "Milkshake": 40,
 }
 
-VENTES_JSON_PATH = "ventes.json"
+VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
 
 def get_sheet_names():
     global fichier
@@ -371,7 +371,7 @@ def obtenir_bilan_ventes_json():
             messagebox.showinfo("Info", "Aucune vente enregistrée.")
             return
         bilan_window = tk.Toplevel(app)
-        bilan_window.title("Bilan des ventes par jour")
+        bilan_window.title("Bilan des ventes")
 
         text_area = tk.Text(bilan_window, wrap=tk.WORD, width=80, height=20)
         text_area.pack(padx=10, pady=10)
