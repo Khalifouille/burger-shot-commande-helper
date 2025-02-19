@@ -465,11 +465,56 @@ def calculer_prix_total():
         prix_total = 0
         for produit, quantite in quantites.items():
             prix_total += quantite * prix_unitaires[produit]
-        prix_total_label.config(text=f"Prix total : {prix_total} €")
+        prix_total_label.config(text=f"Prix total : {prix_total} $")
         return prix_total
     except ValueError:
         prix_total_label.config(text="Prix total : 0 $")
-        return
+        return 0
+
+def obtenir_bilan_ventes_par_jour():
+    global fichier
+    try:
+        nom_feuille = feuille_combobox.get()
+        sheet = fichier.worksheet(nom_feuille)
+        lignes = sheet.get_all_values()
+
+        bilan_ventes = {}
+
+        for ligne in lignes[1:]:  
+            date_vente = ligne[4]
+            if date_vente:
+                if date_vente not in bilan_ventes:
+                    bilan_ventes[date_vente] = {
+                        "Menu Classic": 0,
+                        "Menu Double": 0,
+                        "Menu Contrat": 0,
+                        "Tenders": 0,
+                        "Petite Salade": 0,
+                        "Boisson": 0,
+                        "Milkshake": 0,
+                    }
+                bilan_ventes[date_vente]["Menu Classic"] += int(ligne[3])  
+                bilan_ventes[date_vente]["Menu Double"] += int(ligne[4])  
+                bilan_ventes[date_vente]["Menu Contrat"] += int(ligne[5])  
+                bilan_ventes[date_vente]["Tenders"] += int(ligne[6])  
+                bilan_ventes[date_vente]["Petite Salade"] += int(ligne[7]) 
+                bilan_ventes[date_vente]["Boisson"] += int(ligne[8]) 
+                bilan_ventes[date_vente]["Milkshake"] += int(ligne[9])  
+
+        bilan_window = tk.Toplevel(app)
+        bilan_window.title("Bilan des ventes par jour")
+
+        text_area = tk.Text(bilan_window, wrap=tk.WORD, width=80, height=20)
+        text_area.pack(padx=10, pady=10)
+
+        for date, ventes in bilan_ventes.items():
+            text_area.insert(tk.END, f"Date: {date}\n")
+            for produit, quantite in ventes.items():
+                text_area.insert(tk.END, f"  {produit}: {quantite}\n")
+            text_area.insert(tk.END, "\n")
+
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -490,6 +535,9 @@ feuille_id_combobox.current(0)
 
 charger_fichier_button = tk.Button(app, text="Charger le fichier", command=charger_fichier)
 charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
+
+bilan_button = tk.Button(app, text="Afficher le bilan des ventes par jour", command=obtenir_bilan_ventes_par_jour)
+bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
