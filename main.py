@@ -47,11 +47,9 @@ def get_sheet_names():
         return []
 
 def envoyer_webhook_discord(info_vente):
-
     message = {
         "content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"
     }
-
     try:
         response = requests.post(webhook_url, json=message)
         response.raise_for_status()
@@ -372,23 +370,42 @@ def obtenir_bilan_ventes_json():
             return
         bilan_window = tk.Toplevel(app)
         bilan_window.title("Bilan des ventes")
-
+        date_label = tk.Label(bilan_window, text="Choisir une date :")
+        date_label.grid(row=0, column=0, padx=10, pady=10)
+        date_selector = DateEntry(bilan_window, date_pattern='yyyy-mm-dd')
+        date_selector.grid(row=0, column=1, padx=10, pady=10)
+        afficher_button = tk.Button(bilan_window, text="Afficher les ventes", command=lambda: afficher_ventes_par_date(data, date_selector.get_date(), text_area))
+        afficher_button.grid(row=0, column=2, padx=10, pady=10)
         text_area = tk.Text(bilan_window, wrap=tk.WORD, width=80, height=20)
-        text_area.pack(padx=10, pady=10)
+        text_area.grid(row=1, column=0, columnspan=3, padx=10, pady=10)
 
-        for date, ventes in data.items():
-            text_area.insert(tk.END, f"Date: {date}\n")
+    except json.JSONDecodeError:
+        messagebox.showerror("Erreur", "Le fichier de ventes est vide ou corrompu.")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
+            
+    except json.JSONDecodeError:
+        messagebox.showerror("Erreur", "Le fichier de ventes est vide ou corrompu.")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
+
+def afficher_ventes_par_date(data, selected_date, text_area):
+    try:
+        selected_date_str = selected_date.strftime('%Y-%m-%d')
+        text_area.delete(1.0, tk.END)
+        if selected_date_str in data:
+            ventes = data[selected_date_str]
+            text_area.insert(tk.END, f"Date: {selected_date_str}\n")
             if not ventes:
                 text_area.insert(tk.END, "  Aucune vente pour cette date.\n")
             else:
                 for produit, quantite in ventes.items():
                     text_area.insert(tk.END, f"  {produit}: {quantite}\n")
             text_area.insert(tk.END, "\n")
-            
-    except json.JSONDecodeError:
-        messagebox.showerror("Erreur", "Le fichier de ventes est vide ou corrompu.")
+        else:
+            text_area.insert(tk.END, f"Aucune vente trouvée pour la date {selected_date_str}.\n")
     except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
+        messagebox.showerror("Erreur", f"Erreur lors de l'affichage des ventes : {e}")
 
 def masquer_tous_les_elements():
     masquer_elements()
