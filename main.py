@@ -374,8 +374,11 @@ def obtenir_bilan_ventes_json():
 
         for date, ventes in data.items():
             text_area.insert(tk.END, f"Date: {date}\n")
-            for produit, quantite in ventes.items():
-                text_area.insert(tk.END, f"  {produit}: {quantite}\n")
+            if not ventes:
+                text_area.insert(tk.END, "  Aucune vente pour cette date.\n")
+            else:
+                for produit, quantite in ventes.items():
+                    text_area.insert(tk.END, f"  {produit}: {quantite}\n")
             text_area.insert(tk.END, "\n")
 
     except Exception as e:
@@ -460,7 +463,7 @@ def sauvegarder_preferences():
 
 def sauvegarder_ventes_json(date, ventes):
     try:
-        if not os.path.exists(VENTES_JSON_PATH):
+        if os.path.exists(VENTES_JSON_PATH):
             with open(VENTES_JSON_PATH, "r") as f:
                 data = json.load(f)
         else:
@@ -472,10 +475,9 @@ def sauvegarder_ventes_json(date, ventes):
             data[date] = ventes
         with open(VENTES_JSON_PATH, "w") as f:
             json.dump(data, f, indent=4)
-
         print(f"Ventes sauvegardées pour la date {date}.")
     except Exception as e:
-        print(f"Erreur lors de la sauvegarde des ventes : {e}")
+        messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde des ventes : {e}")
 
 def charger_preferences():
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
