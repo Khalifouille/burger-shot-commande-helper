@@ -467,9 +467,12 @@ def sauvegarder_preferences():
 
 def sauvegarder_ventes_json(date, ventes):
     try:
-        if os.path.exists(VENTES_JSON_PATH):
+        if os.path.exists(VENTES_JSON_PATH) and os.path.getsize(VENTES_JSON_PATH) > 0:
             with open(VENTES_JSON_PATH, "r") as f:
-                data = json.load(f)
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError:
+                    data = {}
         else:
             data = {}
         if date in data:
