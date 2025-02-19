@@ -127,9 +127,6 @@ def confirmer_vente():
             "J": int(milkshake_combobox.get()),  # MilkShake
         }
 
-        date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
-        sauvegarder_ventes_json(date_aujourdhui, valeurs)
-
         ligne = trouver_ligne(sheet, votre_nom)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
@@ -158,6 +155,9 @@ def confirmer_vente():
             }
 
             valeurs_nommees = {menu_mapping[k]: v for k, v in valeurs.items() if v > 0}
+
+            date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
+            sauvegarder_ventes_json(date_aujourdhui, valeurs_nommees)
 
             if valeurs_nommees:
                 embed = {
