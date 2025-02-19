@@ -145,6 +145,8 @@ def confirmer_vente():
             boisson_combobox.set(0)
             milkshake_combobox.set(0)
 
+            calculer_prix_total()
+
             menu_mapping = {
                 "D": "Menu Classic",
                 "E": "Menu Double",
