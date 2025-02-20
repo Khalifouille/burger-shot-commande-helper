@@ -399,33 +399,6 @@ def charger_fichier():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
-def afficher_ventes_filtrees(data, client_filter, date_filter, vendeur_filter, text_area):
-    try:
-        text_area.delete(1.0, tk.END) 
-
-        for date, ventes in data.items():
-            if date_filter and date_filter != date:
-                continue
-
-            text_area.insert(tk.END, f"Date: {date}\n")
-
-            for produit, info_vente in ventes.items():
-                if (client_filter and client_filter.lower() not in info_vente.get("client", "").lower()) or \
-                   (vendeur_filter and vendeur_filter.lower() not in info_vente.get("vendeur", "").lower()):
-                    continue
-
-                # Afficher les détails de la vente
-                text_area.insert(tk.END, f"  Produit: {produit}\n")
-                text_area.insert(tk.END, f"  Quantité: {info_vente.get('quantite', 'N/A')}\n")
-                text_area.insert(tk.END, f"  Client: {info_vente.get('client', 'N/A')}\n")
-                text_area.insert(tk.END, f"  Vendeur: {info_vente.get('vendeur', 'N/A')}\n")
-                text_area.insert(tk.END, "\n")
-
-            text_area.insert(tk.END, "\n")
-
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de l'affichage des ventes filtrées : {e}")
-
 def obtenir_bilan_ventes_json():
     try:
         if not os.path.exists(VENTES_JSON_PATH):
@@ -440,38 +413,22 @@ def obtenir_bilan_ventes_json():
         if not data:
             messagebox.showinfo("Info", "Aucune vente enregistrée.")
             return
-        
         bilan_window = tk.Toplevel(app)
         bilan_window.title("Bilan des ventes")
-
-        filtres_frame = tk.Frame(bilan_window)
-        filtres_frame.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
-
-        client_label = tk.Label(filtres_frame, text="Client :")
-        client_label.grid(row=0, column=0, padx=5, pady=5)
-        client_filter_entry = tk.Entry(filtres_frame)
-        client_filter_entry.grid(row=0, column=1, padx=5, pady=5)
-
-        date_label = tk.Label(filtres_frame, text="Date (YYYY-MM-DD) :")
-        date_label.grid(row=0, column=2, padx=5, pady=5)
-        date_filter_entry = tk.Entry(filtres_frame)
-        date_filter_entry.grid(row=0, column=3, padx=5, pady=5)
-
-        vendeur_label = tk.Label(filtres_frame, text="Vendeur :")
-        vendeur_label.grid(row=0, column=4, padx=5, pady=5)
-        vendeur_filter_entry = tk.Entry(filtres_frame)
-        vendeur_filter_entry.grid(row=0, column=5, padx=5, pady=5)
-
-        filtrer_button = tk.Button(filtres_frame, text="Filtrer", command=lambda: afficher_ventes_filtrees(
-            data, client_filter_entry.get(), date_filter_entry.get(), vendeur_filter_entry.get(), text_area
-        ))
-        filtrer_button.grid(row=0, column=6, padx=5, pady=5)
-
+        date_label = tk.Label(bilan_window, text="Choisir une date :")
+        date_label.grid(row=0, column=0, padx=10, pady=10)
+        date_selector = DateEntry(bilan_window, date_pattern='yyyy-mm-dd')
+        date_selector.grid(row=0, column=1, padx=10, pady=10)
+        afficher_button = tk.Button(bilan_window, text="Afficher les ventes", command=lambda: afficher_ventes_par_date(data, date_selector.get_date(), text_area))
+        afficher_button.grid(row=0, column=2, padx=10, pady=10)
         text_area = tk.Text(bilan_window, wrap=tk.WORD, width=80, height=20)
         text_area.grid(row=1, column=0, columnspan=3, padx=10, pady=10)
 
-        afficher_ventes_filtrees(data, "", "", "", text_area)
-
+    except json.JSONDecodeError:
+        messagebox.showerror("Erreur", "Le fichier de ventes est vide ou corrompu.")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
+            
     except json.JSONDecodeError:
         messagebox.showerror("Erreur", "Le fichier de ventes est vide ou corrompu.")
     except Exception as e:
