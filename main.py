@@ -89,7 +89,6 @@ def ajouter_valeurs(sheet, ligne, valeurs):
         
         if ligne > rows:
             sheet.add_rows(ligne - rows)
-        
         mises_a_jour = []
         for valeur in valeurs:
             for col, val in valeur.items():
@@ -110,7 +109,6 @@ def ajouter_valeurs(sheet, ligne, valeurs):
         
         sheet.batch_update(mises_a_jour)
         print("Valeurs mises à jour avec succès !")
-    
     except Exception as e:
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
 
@@ -223,14 +221,11 @@ def confirmer_vente2():
         sheet = fichier.worksheet(nom_feuille)
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
         
-        # Récupérer la liste des clients
         clients = client_entry.get().strip().split(',')
         
         if not clients:
             resultat_label.config(text="Erreur : Le champ 'Client' est vide.")
             return
-        
-        # Créer une liste de valeurs pour chaque client
         valeurs = []
         for client in clients:
             valeurs.append({
@@ -240,7 +235,6 @@ def confirmer_vente2():
                 "F": "TRUE"                     # Case à cocher
             })
         
-        # Trouver la première ligne vide pour chaque client
         ligne = trouver_premiere_ligne_vide(sheet)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
@@ -250,7 +244,7 @@ def confirmer_vente2():
 
             info_vente = {
                 "vendeur": nom2_entry.get(),
-                "client": client,      
+                "clients": [client.strip() for client in clients],
                 "date": date_aujourdhui,
                 "feuille": nom_feuille,
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -273,8 +267,8 @@ def confirmer_vente2():
                         "inline": True
                     },
                     {
-                        "name": "Client",
-                        "value": info_vente["client"],
+                        "name": "Clients",
+                        "value": ", ".join(info_vente["clients"]),
                         "inline": True
                     },
                     {
