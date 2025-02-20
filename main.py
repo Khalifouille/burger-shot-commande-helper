@@ -93,8 +93,9 @@ def ajouter_valeurs(sheet, ligne, valeurs):
         if ligne > rows:
             sheet.add_rows(ligne - rows)
         mises_a_jour = []
-        for valeur in valeurs:
-            for col, val in valeur.items():
+        
+        if isinstance(valeurs, dict):
+            for col, val in valeurs.items():
                 index_col = ord(col.upper()) - ord("A") + 1
                 if index_col > cols:
                     sheet.add_cols(index_col - cols)
@@ -104,14 +105,38 @@ def ajouter_valeurs(sheet, ligne, valeurs):
                     nouvelle_valeur = str(int(cellule) + val)
                 else:
                     nouvelle_valeur = str(val)
+                
                 mises_a_jour.append({
                     "range": f"{col}{ligne}",  
                     "values": [[nouvelle_valeur]]  
                 })
-            ligne += 1
         
-        sheet.batch_update(mises_a_jour)
-        print("Valeurs mises à jour avec succès !")
+        elif isinstance(valeurs, list):
+            for valeur in valeurs:
+                if isinstance(valeur, dict):
+                    for col, val in valeur.items():
+                        index_col = ord(col.upper()) - ord("A") + 1
+                        if index_col > cols:
+                            sheet.add_cols(index_col - cols)
+                        
+                        cellule = sheet.cell(ligne, index_col).value
+                        if cellule and cellule.isdigit():
+                            nouvelle_valeur = str(int(cellule) + val)
+                        else:
+                            nouvelle_valeur = str(val)
+                        
+                        mises_a_jour.append({
+                            "range": f"{col}{ligne}",  
+                            "values": [[nouvelle_valeur]]  
+                        })
+                    ligne += 1
+        
+        if mises_a_jour:
+            sheet.batch_update(mises_a_jour)
+            print("Valeurs mises à jour avec succès !")
+        else:
+            print("Aucune valeur à mettre à jour.")
+    
     except Exception as e:
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
 
