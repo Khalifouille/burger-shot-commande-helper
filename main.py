@@ -509,22 +509,37 @@ def masquer_elements2():
         elem.grid_remove()
 
 def sauvegarder_preferences():
-    preferences = {
-        "nom": nom_entry.get(),
-        "feuille": feuille_combobox.get(),
-        "fichier_id": feuille_id_combobox.get(),
-        "vendeur": nom2_entry.get(),
-    }
-
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
-    if not os.path.exists(dossier_preferences):
-        os.makedirs(dossier_preferences)
-
     chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
+
+    if os.path.exists(chemin_fichier):
+        with open(chemin_fichier, "r") as f:
+            preferences_existantes = json.load(f)
+    else:
+        preferences_existantes = {}
+
+    fichier_nom = feuille_id_combobox.get()  
+    fichier_selectionne = fichiers_ids.get(fichier_nom)  
+
+    print(f"Fichier sélectionné : {fichier_nom} -> ID : {fichier_selectionne}")
+
+    if fichier_selectionne == "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto":
+        categorie = "Ventes civil"
+    elif fichier_selectionne == "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU":
+        categorie = "Ventes contrats"
+    else:
+        print("Erreur : Fichier non reconnu pour la sauvegarde des préférences.")
+        return
+
+    preferences_existantes[categorie] = {
+        "nom": nom_entry.get() if categorie == "Ventes civil" else "",
+        "vendeur": nom2_entry.get() if categorie == "Ventes contrats" else "",
+        "feuille": feuille_combobox.get()
+    }
 
     try:
         with open(chemin_fichier, "w") as f:
-            json.dump(preferences, f, indent=4) 
+            json.dump(preferences_existantes, f, indent=4)
         print("Préférences sauvegardées avec succès.")
     except Exception as e:
         print(f"Erreur lors de la sauvegarde des préférences : {e}")
@@ -557,18 +572,31 @@ def charger_preferences():
         with open(chemin_fichier, "r") as f:
             preferences = json.load(f)
             print(f"Préférences chargées : {preferences}")
-            nom_entry.insert(0, preferences.get("nom", ""))
-            nom2_entry.insert(0, preferences.get("vendeur", ""))
-            feuille_combobox.set(preferences.get("feuille", ""))
-            feuille_id_combobox.set(preferences.get("fichier_id", ""))
-            fichier_id = preferences.get("fichier_id", "")
-            if fichier_id and fichier_id in fichiers_ids:
-                fichier = client.open_by_key(fichiers_ids[fichier_id])
-                feuilles = get_sheet_names()
-                feuille_combobox["values"] = feuilles
-                feuille_combobox.set(preferences.get("feuille", ""))
+
+            fichier_nom = feuille_id_combobox.get()  
+            fichier_selectionne = fichiers_ids.get(fichier_nom) 
+
+            print(f"Fichier sélectionné : {fichier_nom} -> ID : {fichier_selectionne}")
+
+            if fichier_selectionne == "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto":
+                categorie = "Ventes civil"
+            elif fichier_selectionne == "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU":
+                categorie = "Ventes contrats"
             else:
-                fichier = None
+                print("Erreur : Fichier non reconnu pour le chargement des préférences.")
+                return
+
+            if categorie in preferences:
+                if categorie == "Ventes civil":
+                    nom_entry.delete(0, tk.END)
+                    nom_entry.insert(0, preferences[categorie].get("nom", ""))
+                elif categorie == "Ventes contrats":
+                    nom2_entry.delete(0, tk.END)
+                    nom2_entry.insert(0, preferences[categorie].get("vendeur", ""))
+
+                feuille_combobox["values"] = get_sheet_names()
+                feuille_combobox.set(preferences[categorie].get("feuille", ""))
+
     except FileNotFoundError:
         print("Fichier de préférences non trouvé.")
     except Exception as e:
