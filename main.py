@@ -229,6 +229,14 @@ def confirmer_vente2():
         if not client:
             resultat_label.config(text="Erreur : Le champ 'Client' est vide.")
             return
+        
+        if client and client not in clients_list:
+            clients_list.append(client)
+            client_combobox["values"] = clients_list  
+            sauvegarder_clients_json()
+            print(f"Client '{client}' ajouté avec succès.") 
+        
+        # Enregistrer la vente
         valeurs = [{
             "B": str(nom2_entry.get()),     # Vendeur
             "D": client.strip(),            # Client
@@ -471,14 +479,6 @@ def sauvegarder_clients_json():
     except Exception as e:
         print(f"Erreur lors de la sauvegarde des clients : {e}")
 
-def ajouter_client():
-    client = client_entry.get().strip()
-    if client and client not in clients_list:
-        clients_list.append(client)
-        client_combobox["values"] = clients_list
-        sauvegarder_clients_json()
-        client_entry.delete(0, tk.END)
-
 def charger_clients_json():
     try:
         dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
@@ -529,7 +529,6 @@ def afficher_elements2():
     client_label.grid(row=4, column=0, padx=15, pady=10, sticky="w")
     client_entry.grid(row=4, column=1, padx=15, pady=10, columnspan=2)
     client_combobox.grid(row=4, column=1, padx=15, pady=10, columnspan=2) 
-    ajouter_client_button.grid(row=4, column=3, padx=15, pady=10)
     date_label.grid(row=5, column=0, padx=15, pady=10, sticky="w")
     date_entry.grid(row=5, column=1, padx=15, pady=10, columnspan=2)
     confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
@@ -546,7 +545,7 @@ def masquer_elements():
 
 def masquer_elements2():
     elements_a_cacher = [feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
-                         client_combobox, ajouter_client_button, date_label, date_entry, confirmer_button2, resultat_label]
+                         client_combobox, date_label, date_entry, confirmer_button2, resultat_label]
     for elem in elements_a_cacher:
         elem.grid_remove()
 
@@ -702,8 +701,6 @@ client_label = tk.Label(app, text="Client :")
 client_entry = tk.Entry(app)
 
 client_combobox = ttk.Combobox(app, values=clients_list)
-
-ajouter_client_button = tk.Button(app, text="Ajouter Client", command=ajouter_client)
 
 date_label = tk.Label(app, text="Date :")
 date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
