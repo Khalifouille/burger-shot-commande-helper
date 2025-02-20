@@ -34,6 +34,11 @@ prix_unitaires = {
 
 VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
 
+derniere_feuille_selectionnee = {
+    "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto": None,  # Ventes civil
+    "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU": None   # Ventes contrat
+}
+
 def get_sheet_names():
     global fichier
     try:
@@ -344,21 +349,26 @@ def charger_fichier():
         if fichier_id in fichiers_valides:
             fichier = client.open_by_key(fichier_id)
             feuilles = get_sheet_names()
-            feuille_combobox["values"] = feuilles  
-            feuille_a_selectionner = feuille_combobox.get()
-            if feuille_a_selectionner in feuilles:
-                feuille_combobox.set(feuille_a_selectionner)
+            
+            feuille_combobox["values"] = feuilles 
+
+            if derniere_feuille_selectionnee[fichier_id] and derniere_feuille_selectionnee[fichier_id] in feuilles:
+                feuille_combobox.set(derniere_feuille_selectionnee[fichier_id])
             else:
-                feuille_combobox.current(0)
+                feuille_combobox.current(0)  
 
             resultat_label.config(text="Fichier chargé avec succès !")
-            fichiers_valides[fichier_id]()  
+            fichiers_valides[fichier_id]()
             masquer_boutons_bilan_et_graphique()
         else:
             resultat_label.config(text="Erreur : ID de fichier invalide.")
     
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
+
+def sauvegarder_derniere_feuille_selectionnee():
+    fichier_id = fichiers_ids[feuille_id_combobox.get()]
+    derniere_feuille_selectionnee[fichier_id] = feuille_combobox.get()
 
 def obtenir_bilan_ventes_json():
     try:
@@ -682,6 +692,8 @@ resultat_label = tk.Label(app, text="")
 for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
                  tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
     combobox.bind("<<ComboboxSelected>>", lambda event: calculer_prix_total())
+
+feuille_combobox.bind("<<ComboboxSelected>>", lambda event: sauvegarder_derniere_feuille_selectionnee())
 
 charger_preferences()
 app.mainloop()
