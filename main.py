@@ -16,6 +16,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
 client = gspread.authorize(creds)
 
 fichier = None
+current_page = None
 
 fichiers_ids = {
     "Ventes civil": "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto",
@@ -528,6 +529,7 @@ def masquer_tous_les_elements():
     masquer_elements2()
 
 def afficher_elements():
+    global current_page
     masquer_tous_les_elements()
     nom_label.grid(row=2, column=0, padx=10, pady=10)
     nom_entry.grid(row=2, column=1, padx=10, pady=10)
@@ -550,8 +552,11 @@ def afficher_elements():
     prix_total_label.grid(row=11, column=0, columnspan=3, padx=10, pady=10)
     confirmer_button.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
+    retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
+    current_page = "ventes_civiles"
 
 def afficher_elements2():
+    global current_page
     masquer_tous_les_elements()
     nom2_label.grid(row=2, column=0, padx=15, pady=10, sticky="w")
     nom2_entry.grid(row=2, column=1, padx=15, pady=10, columnspan=2)
@@ -564,6 +569,8 @@ def afficher_elements2():
     date_entry.grid(row=5, column=1, padx=15, pady=10, columnspan=2)
     confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
     resultat_label.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
+    retour_button.grid(row=9, column=0, columnspan=3, padx=15, pady=10)
+    current_page = "ventes_contrats"
 
 def masquer_elements():
     elements_a_cacher = [nom_label, nom_entry, feuille_label, feuille_combobox, menu_classic_label, menu_classic_combobox,
@@ -699,6 +706,16 @@ def charger_fichier():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+def retour():
+    global current_page
+    if current_page == "ventes_civiles":
+        afficher_elements()
+    elif current_page == "ventes_contrats":
+        afficher_elements2()
+    else:
+        masquer_tous_les_elements()
+        retour_button.grid_remove() 
+
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
@@ -730,6 +747,10 @@ nom2_entry = tk.Entry(app)
 
 client_label = tk.Label(app, text="Client :")
 client_entry = tk.Entry(app)
+
+retour_button = tk.Button(app, text="Retour", command=retour)
+retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
+retour_button.grid_remove() 
 
 client_combobox = ttk.Combobox(app, values=clients_list)
 
