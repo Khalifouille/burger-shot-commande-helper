@@ -327,6 +327,10 @@ def enregistrer_vente():
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
 
+def masquer_boutons_bilan_et_graphique():
+    bilan_button.grid_remove()
+    graphique_button.grid_remove()
+
 def charger_fichier():
     global fichier
     fichier_id = fichiers_ids[feuille_id_combobox.get()]
@@ -349,6 +353,7 @@ def charger_fichier():
 
             resultat_label.config(text="Fichier chargé avec succès !")
             fichiers_valides[fichier_id]()  
+            masquer_boutons_bilan_et_graphique()
         else:
             resultat_label.config(text="Erreur : ID de fichier invalide.")
     
