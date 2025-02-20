@@ -86,27 +86,31 @@ def ajouter_valeurs(sheet, ligne, valeurs):
         rows = sheet.row_count
         cols = sheet.col_count
         print(f"Rows: {rows}, Columns: {cols}")
-    
+        
         if ligne > rows:
             sheet.add_rows(ligne - rows)
+        
         mises_a_jour = []
-        for col, valeur in valeurs.items():
-            index_col = ord(col.upper()) - ord("A") + 1
-            if index_col > cols:
-                sheet.add_cols(index_col - cols)
-            
-            cellule = sheet.cell(ligne, index_col).value
-            if cellule and cellule.isdigit():
-                nouvelle_valeur = str(int(cellule) + valeur)
-            else:
-                nouvelle_valeur = str(valeur)
-            mises_a_jour.append({
-                "range": f"{col}{ligne}",  
-                "values": [[nouvelle_valeur]]  
-            })
-
+        for valeur in valeurs:
+            for col, val in valeur.items():
+                index_col = ord(col.upper()) - ord("A") + 1
+                if index_col > cols:
+                    sheet.add_cols(index_col - cols)
+                
+                cellule = sheet.cell(ligne, index_col).value
+                if cellule and cellule.isdigit():
+                    nouvelle_valeur = str(int(cellule) + val)
+                else:
+                    nouvelle_valeur = str(val)
+                mises_a_jour.append({
+                    "range": f"{col}{ligne}",  
+                    "values": [[nouvelle_valeur]]  
+                })
+            ligne += 1
+        
         sheet.batch_update(mises_a_jour)
         print("Valeurs mises à jour avec succès !")
+    
     except Exception as e:
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
 
@@ -218,19 +222,25 @@ def confirmer_vente2():
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
-        client_nom = client_entry.get().strip()
-
-        if not client_nom:
+        
+        # Récupérer la liste des clients
+        clients = client_entry.get().strip().split(',')
+        
+        if not clients:
             resultat_label.config(text="Erreur : Le champ 'Client' est vide.")
             return
-
-        valeurs = {
-            "B": str(nom2_entry.get()),     # Vendeur
-            "D": client_nom,                # Client
-            "E": date_aujourdhui,           # Date du jour
-            "F": "TRUE"                     # Case à cocher
-        }
-
+        
+        # Créer une liste de valeurs pour chaque client
+        valeurs = []
+        for client in clients:
+            valeurs.append({
+                "B": str(nom2_entry.get()),     # Vendeur
+                "D": client.strip(),            # Client
+                "E": date_aujourdhui,           # Date du jour
+                "F": "TRUE"                     # Case à cocher
+            })
+        
+        # Trouver la première ligne vide pour chaque client
         ligne = trouver_premiere_ligne_vide(sheet)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
@@ -240,7 +250,7 @@ def confirmer_vente2():
 
             info_vente = {
                 "vendeur": nom2_entry.get(),
-                "client": client_nom,      
+                "client": client,      
                 "date": date_aujourdhui,
                 "feuille": nom_feuille,
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
