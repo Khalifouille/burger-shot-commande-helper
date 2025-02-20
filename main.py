@@ -32,7 +32,10 @@ prix_unitaires = {
     "Milkshake": 40,
 }
 
+clients_list = []
+
 VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
+CLIENTS_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\clients.json"
 
 def get_sheet_names():
     global fichier
@@ -221,30 +224,28 @@ def confirmer_vente2():
         sheet = fichier.worksheet(nom_feuille)
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
         
-        clients = client_entry.get().strip().split(',')
+        client = client_combobox.get().strip()
         
-        if not clients:
+        if not client:
             resultat_label.config(text="Erreur : Le champ 'Client' est vide.")
             return
-        valeurs = []
-        for client in clients:
-            valeurs.append({
-                "B": str(nom2_entry.get()),     # Vendeur
-                "D": client.strip(),            # Client
-                "E": date_aujourdhui,           # Date du jour
-                "F": "TRUE"                     # Case à cocher
-            })
+        valeurs = [{
+            "B": str(nom2_entry.get()),     # Vendeur
+            "D": client.strip(),            # Client
+            "E": date_aujourdhui,           # Date du jour
+            "F": "TRUE"                     # Case à cocher
+        }]
         
         ligne = trouver_premiere_ligne_vide(sheet)
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
-            client_entry.delete(0, tk.END)
+            client_combobox.set('')
             date_entry.set_date(datetime.datetime.now())
 
             info_vente = {
                 "vendeur": nom2_entry.get(),
-                "clients": [client.strip() for client in clients],
+                "client": client.strip(),
                 "date": date_aujourdhui,
                 "feuille": nom_feuille,
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -267,8 +268,8 @@ def confirmer_vente2():
                         "inline": True
                     },
                     {
-                        "name": "Clients",
-                        "value": ", ".join(info_vente["clients"]),
+                        "name": "Client",
+                        "value": info_vente["client"],
                         "inline": True
                     },
                     {
@@ -456,6 +457,41 @@ def generer_graphique_ventes():
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de la génération du graphique : {e}")
 
+def sauvegarder_clients_json():
+    try:
+        dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
+        if not os.path.exists(dossier_preferences):
+            os.makedirs(dossier_preferences)
+
+        chemin_fichier = os.path.join(dossier_preferences, "clients.json")
+
+        with open(chemin_fichier, "w") as f:
+            json.dump(clients_list, f, indent=4)
+        print("Clients sauvegardés avec succès.")
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde des clients : {e}")
+
+def ajouter_client():
+    client = client_entry.get().strip()
+    if client and client not in clients_list:
+        clients_list.append(client)
+        client_combobox["values"] = clients_list
+        sauvegarder_clients_json()
+        client_entry.delete(0, tk.END)
+
+def charger_clients_json():
+    try:
+        dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
+        chemin_fichier = os.path.join(dossier_preferences, "clients.json")
+
+        if os.path.exists(chemin_fichier):
+            with open(chemin_fichier, "r") as f:
+                global clients_list
+                clients_list = json.load(f)
+                print("Clients chargés avec succès.")
+    except Exception as e:
+        print(f"Erreur lors du chargement des clients : {e}")
+
 def masquer_tous_les_elements():
     masquer_elements()
     masquer_elements2()
@@ -492,6 +528,8 @@ def afficher_elements2():
     feuille_combobox.grid(row=3, column=1, padx=15, pady=10, columnspan=2)
     client_label.grid(row=4, column=0, padx=15, pady=10, sticky="w")
     client_entry.grid(row=4, column=1, padx=15, pady=10, columnspan=2)
+    client_combobox.grid(row=4, column=1, padx=15, pady=10, columnspan=2) 
+    ajouter_client_button.grid(row=4, column=3, padx=15, pady=10)
     date_label.grid(row=5, column=0, padx=15, pady=10, sticky="w")
     date_entry.grid(row=5, column=1, padx=15, pady=10, columnspan=2)
     confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
@@ -508,7 +546,7 @@ def masquer_elements():
 
 def masquer_elements2():
     elements_a_cacher = [feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
-                         date_label, date_entry, confirmer_button2, resultat_label]
+                         client_combobox, ajouter_client_button, date_label, date_entry, confirmer_button2, resultat_label]
     for elem in elements_a_cacher:
         elem.grid_remove()
 
@@ -663,6 +701,10 @@ nom2_entry = tk.Entry(app)
 client_label = tk.Label(app, text="Client :")
 client_entry = tk.Entry(app)
 
+client_combobox = ttk.Combobox(app, values=clients_list)
+
+ajouter_client_button = tk.Button(app, text="Ajouter Client", command=ajouter_client)
+
 date_label = tk.Label(app, text="Date :")
 date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
 
@@ -715,5 +757,7 @@ for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combo
                  tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
     combobox.bind("<<ComboboxSelected>>", lambda event: calculer_prix_total())
 
+charger_clients_json()
+client_combobox["values"] = clients_list
 charger_preferences()
 app.mainloop()
