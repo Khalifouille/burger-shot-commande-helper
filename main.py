@@ -224,25 +224,31 @@ def confirmer_vente2():
         sheet = fichier.worksheet(nom_feuille)
         date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
         
-        client = client_combobox.get().strip()
+        clients_saisis = client_combobox.get().strip()
         
-        if not client:
+        if not clients_saisis:
             resultat_label.config(text="Erreur : Le champ 'Client' est vide.")
             return
         
-        if client and client not in clients_list:
-            clients_list.append(client)
-            client_combobox["values"] = clients_list  
-            sauvegarder_clients_json()
-            print(f"Client '{client}' ajouté avec succès.") 
+        clients = [client.strip() for client in clients_saisis.split(",") if client.strip()]
         
-        # Enregistrer la vente
-        valeurs = [{
-            "B": str(nom2_entry.get()),     # Vendeur
-            "D": client.strip(),            # Client
-            "E": date_aujourdhui,           # Date du jour
-            "F": "TRUE"                     # Case à cocher
-        }]
+        for client in clients:
+            if client and client not in clients_list:
+                clients_list.append(client)
+                print(f"Client '{client}' ajouté avec succès.")
+        
+        if clients:
+            client_combobox["values"] = clients_list
+            sauvegarder_clients_json()
+        
+        valeurs = []
+        for client in clients:
+            valeurs.append({
+                "B": str(nom2_entry.get()),     # Vendeur
+                "D": client.strip(),            # Client
+                "E": date_aujourdhui,           # Date du jour
+                "F": "TRUE"                     # Case à cocher
+            })
         
         ligne = trouver_premiere_ligne_vide(sheet)
         if ligne:
@@ -253,7 +259,7 @@ def confirmer_vente2():
 
             info_vente = {
                 "vendeur": nom2_entry.get(),
-                "client": client.strip(),
+                "clients": clients,
                 "date": date_aujourdhui,
                 "feuille": nom_feuille,
                 "date_heure": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -276,8 +282,8 @@ def confirmer_vente2():
                         "inline": True
                     },
                     {
-                        "name": "Client",
-                        "value": info_vente["client"],
+                        "name": "Clients",
+                        "value": ", ".join(info_vente["clients"]),
                         "inline": True
                     },
                     {
