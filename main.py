@@ -119,83 +119,36 @@ def confirmer_vente():
         if ligne:
             ajouter_valeurs(sheet, ligne, valeurs)
             resultat_label.config(text="Vente enregistrée avec succès !")
-
             prix_total = calculer_prix_total()
 
-            menu_classic_combobox.set(0)
-            menu_double_combobox.set(0)
-            menu_contrat_combobox.set(0)
-            tenders_combobox.set(0)
-            petite_salade_combobox.set(0)
-            boisson_combobox.set(0)
-            milkshake_combobox.set(0)
+            for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
+                            tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
+                combobox.set(0)
 
-            calculer_prix_total()
-
-            menu_mapping = {
-                "D": "Menu Classic",
-                "E": "Menu Double",
-                "F": "Menu Contrat",
-                "G": "Tenders",
-                "H": "Petite Salade",
-                "I": "Boisson",
-                "J": "MilkShake",
-            }
-
-            valeurs_nommees = {menu_mapping[k]: v for k, v in valeurs.items() if v > 0}
-
+            valeurs_nommees = {k: v for k, v in valeurs.items() if v > 0}
             date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
             sauvegarder_ventes_json(date_aujourdhui, valeurs_nommees)
 
             if valeurs_nommees:
                 embed = {
-                "title": "🟢 Nouvelle vente [CIVILS]",
-                "color": 0x00FF00,
-                "author": {
-                    "name": "Burger Shot - NoFace",
-                    "icon_url": "https://i.postimg.cc/HLw6hBVh/bs-pp.png" 
-                },
-                "image": {
-                    "url": "https://i.postimg.cc/DfjBHWwn/banner.jpg"
-                },
-                "fields": [
-                    {
-                        "name": "Vendeur",
-                        "value": votre_nom,
-                        "inline": True
-                    },
-                    {
-                            "name": "Date et heure",
-                            "value": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                            "inline": True
-                        },
-                        {
-                            "name": "Détails de la vente",
-                            "value": "\n".join([f"- **{k} :** {v}" for k, v in valeurs_nommees.items()]),
-                            "inline": False
-                        },
-                        {
-                            "name": "Prix total",
-                            "value": f"{prix_total} $",
-                            "inline": True
-                        }
+                    "title": "🟢 Nouvelle vente [CIVILS]",
+                    "color": 0x00FF00,
+                    "author": {"name": "Burger Shot - NoFace", "icon_url": "https://i.postimg.cc/HLw6hBVh/bs-pp.png"},
+                    "image": {"url": "https://i.postimg.cc/DfjBHWwn/banner.jpg"},
+                    "fields": [
+                        {"name": "Vendeur", "value": votre_nom, "inline": True},
+                        {"name": "Date et heure", "value": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "inline": True},
+                        {"name": "Détails de la vente", "value": "\n".join([f"- **{k} :** {v}" for k, v in valeurs_nommees.items()]), "inline": False},
+                        {"name": "Prix total", "value": f"{prix_total} $", "inline": True}
                     ],
-                    "footer": {
-                        "text": "Système de gestion des ventes"
-                    },
+                    "footer": {"text": "Système de gestion des ventes"},
                     "timestamp": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
-
-                data = {
-                    "embeds": [embed]
-                }
-
+                data = {"embeds": [embed]}
                 headers = {"Content-Type": "application/json"}
                 response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
-
                 if response.status_code != 204:
                     print(f"Erreur lors de l'envoi du webhook : {response.status_code}")
-
         else:
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
@@ -577,14 +530,10 @@ def sauvegarder_preferences():
 
 def sauvegarder_ventes_json(date, ventes):
     try:
+        data = {}
         if os.path.exists(VENTES_JSON_PATH) and os.path.getsize(VENTES_JSON_PATH) > 0:
             with open(VENTES_JSON_PATH, "r") as f:
-                try:
-                    data = json.load(f)
-                except json.JSONDecodeError:
-                    data = {}
-        else:
-            data = {}
+                data = json.load(f)
         if date in data:
             for produit, quantite in ventes.items():
                 data[date][produit] = data[date].get(produit, 0) + quantite
@@ -631,14 +580,11 @@ def calculer_prix_total():
             "Boisson": int(boisson_combobox.get()),
             "Milkshake": int(milkshake_combobox.get()),
         }
-        prix_total = 0
-        for produit, quantite in quantites.items():
-            prix_total += quantite * prix_unitaires[produit]
+        prix_total = sum(quantites[produit] * prix_unitaires[produit] for produit in quantites)
         prix_total_label.config(text=f"Prix total : {prix_total} $")
         return prix_total
     except ValueError:
         prix_total_label.config(text="Prix total : 0 $")
-        return 0
 
 def masquer_boutons_bilan_et_graphique():
     bilan_button.grid_remove()
@@ -689,11 +635,10 @@ def retour():
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
-image_path = "bs.png"  
+image_path = "bs.png"
 image = Image.open(image_path)
-image = image.resize((300, 100), Image.Resampling.LANCZOS)  
+image = image.resize((300, 100), Image.Resampling.LANCZOS)
 photo = ImageTk.PhotoImage(image)
-
 titre_label = tk.Label(app, image=photo)
 titre_label.grid(row=0, column=0, columnspan=3, pady=10)
 
