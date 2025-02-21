@@ -42,19 +42,14 @@ def get_sheet_names():
     global fichier
     try:
         if fichier:
-            feuilles = fichier.worksheets()
-            noms_feuilles = [feuille.title for feuille in feuilles]
-            return noms_feuilles
-        else:
-            return []
+            return [feuille.title for feuille in fichier.worksheets()]
+        return []
     except Exception as e:
         print(f"Erreur lors de la récupération des feuilles : {e}")
         return []
 
 def envoyer_webhook_discord(info_vente):
-    message = {
-        "content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"
-    }
+    message = {"content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"}
     try:
         response = requests.post(webhook_url, json=message)
         response.raise_for_status()
@@ -65,12 +60,12 @@ def envoyer_webhook_discord(info_vente):
 def trouver_premiere_ligne_vide(sheet):
     try:
         colonnes_b = sheet.col_values(4)
-        for i, valeur in enumerate(colonnes_b[5:], start=6):  
-            if not valeur: 
+        for i, valeur in enumerate(colonnes_b[5:], start=6):
+            if not valeur:
                 return i
-        return len(colonnes_b) + 1 
+        return len(colonnes_b) + 1
     except Exception as e:
-        print(f"Erreur lors de la recherche de la première cellule vide de la colonne B : {e}")
+        print(f"Erreur lors de la recherche de la première cellule vide : {e}")
         return None
 
 def trouver_ligne(sheet, nom):
@@ -78,7 +73,7 @@ def trouver_ligne(sheet, nom):
         lignes = sheet.get_all_values()
         for i, ligne in enumerate(lignes):
             if nom in ligne:
-                return i + 1  
+                return i + 1
         print(f"Erreur : {nom} non trouvé dans la feuille.")
         return None
     except Exception as e:
@@ -87,57 +82,20 @@ def trouver_ligne(sheet, nom):
 
 def ajouter_valeurs(sheet, ligne, valeurs):
     try:
-        rows = sheet.row_count
-        cols = sheet.col_count
-        print(f"Rows: {rows}, Columns: {cols}")
-        
-        if ligne > rows:
-            sheet.add_rows(ligne - rows)
-        mises_a_jour = []
-        
         if isinstance(valeurs, dict):
+            mises_a_jour = []
             for col, val in valeurs.items():
                 index_col = ord(col.upper()) - ord("A") + 1
-                if index_col > cols:
-                    sheet.add_cols(index_col - cols)
-                
                 cellule = sheet.cell(ligne, index_col).value
-                if cellule and cellule.isdigit():
-                    nouvelle_valeur = str(int(cellule) + val)
-                else:
-                    nouvelle_valeur = str(val)
-                
-                mises_a_jour.append({
-                    "range": f"{col}{ligne}",  
-                    "values": [[nouvelle_valeur]]  
-                })
-        
+                nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
+                mises_a_jour.append({"range": f"{col}{ligne}", "values": [[nouvelle_valeur]]})
+            if mises_a_jour:
+                sheet.batch_update(mises_a_jour)
+                print("Valeurs mises à jour avec succès !")
         elif isinstance(valeurs, list):
             for valeur in valeurs:
-                if isinstance(valeur, dict):
-                    for col, val in valeur.items():
-                        index_col = ord(col.upper()) - ord("A") + 1
-                        if index_col > cols:
-                            sheet.add_cols(index_col - cols)
-                        
-                        cellule = sheet.cell(ligne, index_col).value
-                        if cellule and cellule.isdigit():
-                            nouvelle_valeur = str(int(cellule) + val)
-                        else:
-                            nouvelle_valeur = str(val)
-                        
-                        mises_a_jour.append({
-                            "range": f"{col}{ligne}",  
-                            "values": [[nouvelle_valeur]]  
-                        })
-                    ligne += 1
-        
-        if mises_a_jour:
-            sheet.batch_update(mises_a_jour)
-            print("Valeurs mises à jour avec succès !")
-        else:
-            print("Aucune valeur à mettre à jour.")
-    
+                ajouter_valeurs(sheet, ligne, valeur)
+                ligne += 1
     except Exception as e:
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
 
@@ -374,7 +332,11 @@ def enregistrer_vente():
 
 def charger_fichier():
     global fichier
-    fichier_id = fichiers_ids[feuille_id_combobox.get()]
+    fichier_id = fichiers_ids.get(feuille_id_combobox.get())
+    
+    if not fichier_id:
+        resultat_label.config(text="Erreur : ID de fichier invalide.")
+        return
     
     fichiers_valides = {
         "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto": afficher_elements,
@@ -393,7 +355,9 @@ def charger_fichier():
                 feuille_combobox.current(0)
 
             resultat_label.config(text="Fichier chargé avec succès !")
+            app.after(2000, lambda: resultat_label.config(text=""))
             fichiers_valides[fichier_id]()  
+            masquer_boutons_bilan_et_graphique()
         else:
             resultat_label.config(text="Erreur : ID de fichier invalide.")
     
