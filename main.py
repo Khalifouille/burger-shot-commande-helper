@@ -709,9 +709,11 @@ def charger_fichier():
 def retour():
     global current_page
     if current_page == "ventes_civiles":
-        afficher_elements()
+        masquer_elements()
+        afficher_elements2()  
     elif current_page == "ventes_contrats":
-        afficher_elements2()
+        masquer_elements2()
+        afficher_elements()  
     else:
         masquer_tous_les_elements()
         retour_button.grid_remove() 
@@ -748,7 +750,7 @@ nom2_entry = tk.Entry(app)
 client_label = tk.Label(app, text="Client :")
 client_entry = tk.Entry(app)
 
-retour_button = tk.Button(app, text="Retour", command=retour)
+retour_button = tk.Button(app, text="Switch Page", command=retour)
 retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 retour_button.grid_remove() 
 
