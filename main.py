@@ -545,6 +545,20 @@ def sauvegarder_ventes_json(date, ventes):
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde des ventes : {e}")
 
+def get_sheet_names():
+    global fichier
+    try:
+        if fichier:
+            feuilles = fichier.worksheets()
+            print("Feuilles récupérées depuis l'API :", [feuille.title for feuille in feuilles])
+            return [feuille.title for feuille in feuilles]
+        else:
+            print("Erreur : Aucun fichier Google Sheets chargé.")
+            return []
+    except Exception as e:
+        print(f"Erreur lors de la récupération des feuilles : {e}")
+        return []
+
 def charger_preferences():
     dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
     chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
@@ -560,8 +574,8 @@ def charger_preferences():
             if fichier_id and fichier_id in fichiers_ids:
                 try:
                     fichier = client.open_by_key(fichiers_ids[fichier_id])
-                    print("Fichier Google Sheets chargé avec succès.")
-                    
+                    print("Fichier Google Sheets chargé avec succès :", fichier.title)
+
                     feuilles = get_sheet_names()
                     if feuilles:
                         print("Feuilles récupérées avec succès :", feuilles)
@@ -615,7 +629,6 @@ def charger_fichier():
             feuilles = get_sheet_names()
             feuille_combobox["values"] = feuilles  
             feuille_a_selectionner = feuille_combobox.get()
-            charger_preferences()
             if feuille_a_selectionner in feuilles:
                 feuille_combobox.set(feuille_a_selectionner)
             else:
