@@ -291,11 +291,16 @@ def charger_fichier():
         resultat_label.config(text="Erreur : ID de fichier invalide.")
         return
     
+    nom_entry.delete(0, tk.END)
+    nom2_entry.delete(0, tk.END)
+    feuille_combobox.set("")
+    feuille_id_combobox.set("")
+    
     fichiers_valides = {
         "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto": afficher_elements,
         "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU": afficher_elements2
     }
-
+    charger_preferences()
     try:
         if fichier_id in fichiers_valides:
             fichier = client.open_by_key(fichier_id)
@@ -613,35 +618,6 @@ def calculer_prix_total():
 def masquer_boutons_bilan_et_graphique():
     bilan_button.grid_remove()
     graphique_button.grid_remove()
-
-def charger_fichier():
-    global fichier
-    fichier_id = fichiers_ids[feuille_id_combobox.get()]
-    
-    fichiers_valides = {
-        "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto": afficher_elements,
-        "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU": afficher_elements2
-    }
-    try:
-        if fichier_id in fichiers_valides:
-            fichier = client.open_by_key(fichier_id)
-            feuilles = get_sheet_names()
-            feuille_combobox["values"] = feuilles  
-            feuille_a_selectionner = feuille_combobox.get()
-            if feuille_a_selectionner in feuilles:
-                feuille_combobox.set(feuille_a_selectionner)
-            else:
-                feuille_combobox.current(0)
-
-            resultat_label.config(text="Fichier chargé avec succès !")
-            app.after(2000, lambda: resultat_label.config(text=""))
-            fichiers_valides[fichier_id]()  
-            masquer_boutons_bilan_et_graphique()
-        else:
-            resultat_label.config(text="Erreur : ID de fichier invalide.")
-    
-    except Exception as e:
-        resultat_label.config(text=f"Erreur : {e}")
 
 def retour():
     global current_page
