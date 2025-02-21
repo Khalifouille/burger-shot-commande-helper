@@ -568,8 +568,10 @@ def afficher_elements2():
     date_label.grid(row=5, column=0, padx=15, pady=10, sticky="w")
     date_entry.grid(row=5, column=1, padx=15, pady=10, columnspan=2)
     confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
-    resultat_label.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
-    retour_button.grid(row=9, column=0, columnspan=3, padx=15, pady=10)
+    resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
+    retour_button.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
+    sauvegarder_preferences_button.grid_remove()
+    
     current_page = "ventes_contrats"
 
 def masquer_elements():
