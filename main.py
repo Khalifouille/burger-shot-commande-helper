@@ -568,25 +568,19 @@ def charger_preferences():
             print(f"Préférences chargées : {preferences}")
             nom_entry.insert(0, preferences.get("nom", ""))
             nom2_entry.insert(0, preferences.get("vendeur", ""))
-            feuille_pref = preferences.get("feuille", "")
-            print(f"Valeur de 'feuille' dans les préférences : {feuille_pref}")
-
+            feuille_combobox.insert(0,preferences.get("feuille", ""))
+            feuille_id_combobox.set(preferences.get("fichier_id", ""))
             fichier_id = preferences.get("fichier_id", "")
             if fichier_id and fichier_id in fichiers_ids:
                 try:
                     fichier = client.open_by_key(fichiers_ids[fichier_id])
                     print("Fichier Google Sheets chargé avec succès :", fichier.title)
+
                     feuilles = get_sheet_names()
                     if feuilles:
                         print("Feuilles récupérées avec succès :", feuilles)
                         feuille_combobox["values"] = feuilles
-        
-                        if feuille_pref in feuilles:
-                            feuille_combobox.set(feuille_pref)
-                            print(f"Feuille préférée '{feuille_pref}' sélectionnée.")
-                        else:
-                            print(f"Feuille préférée '{feuille_pref}' non trouvée dans les feuilles disponibles.")
-                            feuille_combobox.set("")
+                        feuille_combobox.set(preferences.get("feuille", ""))
                     else:
                         print("Erreur : Aucune feuille trouvée dans le fichier Google Sheets.")
                 except Exception as e:
@@ -628,7 +622,6 @@ def charger_fichier():
         "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto": afficher_elements,
         "1t0Kc1PIe2jTokKqstNQLd1rBvSe27rdPrb3x2AyAFhU": afficher_elements2
     }
-
     try:
         if fichier_id in fichiers_valides:
             fichier = client.open_by_key(fichier_id)
@@ -753,5 +746,5 @@ for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combo
 
 charger_clients_json()
 client_combobox["values"] = clients_list
-charger_preferences()
+#charger_preferences()
 app.mainloop()
