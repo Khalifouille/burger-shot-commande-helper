@@ -553,6 +553,7 @@ def afficher_elements():
     confirmer_button.grid(row=12, column=0, columnspan=3, padx=10, pady=10)
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
     retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
+    sauvegarder_preferences_button.grid_remove()
     current_page = "ventes_civiles"
 
 def afficher_elements2():
@@ -700,6 +701,7 @@ def charger_fichier():
                 feuille_combobox.current(0)
 
             resultat_label.config(text="Fichier chargé avec succès !")
+            app.after(2000, lambda: resultat_label.config(text=""))
             fichiers_valides[fichier_id]()  
             masquer_boutons_bilan_et_graphique()
         else:
