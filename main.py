@@ -568,19 +568,25 @@ def charger_preferences():
             print(f"Préférences chargées : {preferences}")
             nom_entry.insert(0, preferences.get("nom", ""))
             nom2_entry.insert(0, preferences.get("vendeur", ""))
-            feuille_combobox.set(preferences.get("feuille", ""))
-            feuille_id_combobox.set(preferences.get("fichier_id", ""))
+            feuille_pref = preferences.get("feuille", "")
+            print(f"Valeur de 'feuille' dans les préférences : {feuille_pref}")
+
             fichier_id = preferences.get("fichier_id", "")
             if fichier_id and fichier_id in fichiers_ids:
                 try:
                     fichier = client.open_by_key(fichiers_ids[fichier_id])
                     print("Fichier Google Sheets chargé avec succès :", fichier.title)
-
                     feuilles = get_sheet_names()
                     if feuilles:
                         print("Feuilles récupérées avec succès :", feuilles)
                         feuille_combobox["values"] = feuilles
-                        feuille_combobox.set(preferences.get("feuille", ""))
+        
+                        if feuille_pref in feuilles:
+                            feuille_combobox.set(feuille_pref)
+                            print(f"Feuille préférée '{feuille_pref}' sélectionnée.")
+                        else:
+                            print(f"Feuille préférée '{feuille_pref}' non trouvée dans les feuilles disponibles.")
+                            feuille_combobox.set("")
                     else:
                         print("Erreur : Aucune feuille trouvée dans le fichier Google Sheets.")
                 except Exception as e:
