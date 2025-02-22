@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from tkinter import simpledialog
 from tkcalendar import DateEntry
 from PIL import Image, ImageTk
 import gspread
@@ -11,15 +10,13 @@ import datetime
 import requests
 from webhook import WEBHOOK_URL
 import matplotlib.pyplot as plt
-import threading
 
-SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-CREDS_FILE = "api_key.json"
-VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
-CLIENTS_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\clients.json"
-
-creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", SCOPE)
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
 client = gspread.authorize(creds)
+
+fichier = None
+current_page = None
 
 fichiers_ids = {
     "Ventes civil": "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto",
@@ -38,6 +35,9 @@ prix_unitaires = {
 
 clients_list = []
 
+VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
+CLIENTS_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\clients.json"
+
 def get_sheet_names():
     global fichier
     try:
@@ -49,21 +49,21 @@ def get_sheet_names():
         return []
 
 def envoyer_webhook_discord(info_vente):
-    def send():
-        message = {"content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"}
-        try:
-            response = requests.post(WEBHOOK_URL, json=message)
-            response.raise_for_status()
-            print("Webhook envoyé avec succès.")
-        except Exception as e:
-            print(f"Erreur lors de l'envoi du webhook : {e}")
-
-    threading.Thread(target=send).start()
+    message = {"content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"}
+    try:
+        response = requests.post(WEBHOOK_URL, json=message)
+        response.raise_for_status()
+        print("Webhook envoyé avec succès.")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi du webhook : {e}")
 
 def trouver_premiere_ligne_vide(sheet):
     try:
         colonnes_b = sheet.col_values(4)
-        return next((i for i, val in enumerate(colonnes_b[5:], start=6) if not val), len(colonnes_b) + 1)
+        for i, valeur in enumerate(colonnes_b[5:], start=6):
+            if not valeur:
+                return i
+        return len(colonnes_b) + 1
     except Exception as e:
         print(f"Erreur lors de la recherche de la première cellule vide : {e}")
         return None
@@ -71,7 +71,11 @@ def trouver_premiere_ligne_vide(sheet):
 def trouver_ligne(sheet, nom):
     try:
         lignes = sheet.get_all_values()
-        return next((i + 1 for i, ligne in enumerate(lignes) if nom in ligne), None)
+        for i, ligne in enumerate(lignes):
+            if nom in ligne:
+                return i + 1
+        print(f"Erreur : {nom} non trouvé dans la feuille.")
+        return None
     except Exception as e:
         print(f"Erreur lors de la recherche de la ligne : {e}")
         return None
@@ -79,13 +83,19 @@ def trouver_ligne(sheet, nom):
 def ajouter_valeurs(sheet, ligne, valeurs):
     try:
         if isinstance(valeurs, dict):
-            mises_a_jour = [
-                {"range": f"{col}{ligne}", "values": [[str(int(sheet.cell(ligne, ord(col.upper()) - ord("A") + 1).value or 0) + val)]]}
-                for col, val in valeurs.items()
-            ]
+            mises_a_jour = []
+            for col, val in valeurs.items():
+                index_col = ord(col.upper()) - ord("A") + 1
+                cellule = sheet.cell(ligne, index_col).value
+                nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
+                mises_a_jour.append({"range": f"{col}{ligne}", "values": [[nouvelle_valeur]]})
             if mises_a_jour:
                 sheet.batch_update(mises_a_jour)
                 print("Valeurs mises à jour avec succès !")
+        elif isinstance(valeurs, list):
+            for valeur in valeurs:
+                ajouter_valeurs(sheet, ligne, valeur)
+                ligne += 1
     except Exception as e:
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
 
@@ -95,17 +105,6 @@ def confirmer_vente():
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
         votre_nom = nom_entry.get()
-
-        colonnes_produits = {
-            "D": "Menu Classic",
-            "E": "Menu Double",
-            "F": "Menu Contrat",
-            "G": "Tenders",
-            "H": "Petite Salade",
-            "I": "Boisson",
-            "J": "Milkshake"
-        }
-
         valeurs = {
             "D": int(menu_classic_combobox.get()),  # Menu Classic
             "E": int(menu_double_combobox.get()),  # Menu Double
@@ -123,10 +122,10 @@ def confirmer_vente():
             prix_total = calculer_prix_total()
 
             for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
-                             tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
+                            tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
                 combobox.set(0)
 
-            valeurs_nommees = {colonnes_produits[k]: v for k, v in valeurs.items() if v > 0}
+            valeurs_nommees = {k: v for k, v in valeurs.items() if v > 0}
             date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
             sauvegarder_ventes_json(date_aujourdhui, valeurs_nommees)
 
@@ -251,7 +250,7 @@ def confirmer_vente2():
             }
 
             headers = {"Content-Type": "application/json"}
-            response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+            response = requests.post(WEBHOOK_URL, data=json.dumps(data), headers=headers)
 
             if response.status_code != 204:
                 print(f"Erreur lors de l'envoi du webhook : {response.status_code}")
@@ -316,7 +315,7 @@ def charger_fichier():
             resultat_label.config(text="Fichier chargé avec succès !")
             app.after(2000, lambda: resultat_label.config(text=""))
             fichiers_valides[fichier_id]()  
-            masquer_boutons_premier_page()
+            masquer_boutons_bilan_et_graphique()
         else:
             resultat_label.config(text="Erreur : ID de fichier invalide.")
     
@@ -616,10 +615,9 @@ def calculer_prix_total():
     except ValueError:
         prix_total_label.config(text="Prix total : 0 $")
 
-def masquer_boutons_premier_page():
+def masquer_boutons_bilan_et_graphique():
     bilan_button.grid_remove()
     graphique_button.grid_remove()
-    gestion_ventes_button.grid_remove()
 
 def retour():
     global current_page
@@ -632,86 +630,6 @@ def retour():
     else:
         masquer_tous_les_elements()
         retour_button.grid_remove() 
-
-def charger_ventes_json():
-    if os.path.exists(VENTES_JSON_PATH) and os.path.getsize(VENTES_JSON_PATH) > 0:
-        with open(VENTES_JSON_PATH, "r") as f:
-            return json.load(f)
-    return {}
-
-def sauvegarder_ventes_json(data):
-    with open(VENTES_JSON_PATH, "w") as f:
-        json.dump(data, f, indent=4)
-
-def supprimer_vente(date, produit):
-    ventes = charger_ventes_json()
-    if date in ventes and produit in ventes[date]:
-        del ventes[date][produit]
-        if not ventes[date]:
-            del ventes[date]
-        sauvegarder_ventes_json(ventes)
-        return True
-    return False
-
-def modifier_vente(date, produit, nouvelle_quantite):
-    ventes = charger_ventes_json()
-    if date in ventes and produit in ventes[date]:
-        ventes[date][produit] = nouvelle_quantite
-        sauvegarder_ventes_json(ventes)
-        return True
-    return False
-
-def ouvrir_gestion_ventes():
-    gestion_window = tk.Toplevel(app)
-    gestion_window.title("Gestion des Ventes")
-
-    date_label = tk.Label(gestion_window, text="Choisir une date :")
-    date_label.grid(row=0, column=0, padx=10, pady=10)
-    date_selector = DateEntry(gestion_window, date_pattern='yyyy-mm-dd')
-    date_selector.grid(row=0, column=1, padx=10, pady=10)
-
-    text_area = tk.Text(gestion_window, wrap=tk.WORD, width=80, height=20)
-    text_area.grid(row=1, column=0, columnspan=3, padx=10, pady=10)
-
-    afficher_button = tk.Button(gestion_window, text="Afficher les ventes", command=lambda: afficher_ventes_par_date(date_selector.get_date(), text_area))
-    afficher_button.grid(row=0, column=2, padx=10, pady=10)
-
-    supprimer_button = tk.Button(gestion_window, text="Supprimer une vente", command=lambda: supprimer_vente_interface(date_selector.get_date(), text_area))
-    supprimer_button.grid(row=2, column=0, padx=10, pady=10)
-
-    modifier_button = tk.Button(gestion_window, text="Modifier une vente", command=lambda: modifier_vente_interface(date_selector.get_date(), text_area))
-    modifier_button.grid(row=2, column=1, padx=10, pady=10)
-
-def afficher_ventes_par_date(date, text_area):
-    date_str = date.strftime('%Y-%m-%d')
-    ventes = charger_ventes_json()
-    text_area.delete(1.0, tk.END)
-    if date_str in ventes:
-        text_area.insert(tk.END, f"Ventes pour le {date_str} :\n")
-        for produit, quantite in ventes[date_str].items():
-            text_area.insert(tk.END, f"- {produit}: {quantite}\n")
-    else:
-        text_area.insert(tk.END, f"Aucune vente trouvée pour le {date_str}.\n")
-
-def supprimer_vente_interface(date, text_area):
-    date_str = date.strftime('%Y-%m-%d')
-    produit = simpledialog.askstring("Supprimer une vente", "Entrez le nom du produit à supprimer :")
-    if produit and supprimer_vente(date_str, produit):
-        messagebox.showinfo("Succès", f"La vente de {produit} a été supprimée.")
-        afficher_ventes_par_date(date, text_area)
-    else:
-        messagebox.showerror("Erreur", "Impossible de supprimer la vente.")
-
-def modifier_vente_interface(date, text_area):
-    date_str = date.strftime('%Y-%m-%d')
-    produit = simpledialog.askstring("Modifier une vente", "Entrez le nom du produit à modifier :")
-    if produit:
-        nouvelle_quantite = simpledialog.askinteger("Modifier une vente", f"Entrez la nouvelle quantité pour {produit} :")
-        if nouvelle_quantite is not None and modifier_vente(date_str, produit, nouvelle_quantite):
-            messagebox.showinfo("Succès", f"La vente de {produit} a été modifiée.")
-            afficher_ventes_par_date(date, text_area)
-        else:
-            messagebox.showerror("Erreur", "Impossible de modifier la vente.")
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -795,9 +713,6 @@ sauvegarder_preferences_button.grid(row=13, column=0, columnspan=3, padx=10, pad
 
 graphique_button = tk.Button(app, text="Générer le graphique des ventes", command=generer_graphique_ventes)
 graphique_button.grid(row=15, column=0, columnspan=3, padx=10, pady=10)
-
-gestion_ventes_button = tk.Button(app, text="Gérer les ventes", command=ouvrir_gestion_ventes)
-gestion_ventes_button.grid(row=16, column=0, columnspan=3, padx=10, pady=10)
 
 resultat_label = tk.Label(app, text="")
 
