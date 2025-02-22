@@ -94,6 +94,17 @@ def confirmer_vente():
         nom_feuille = feuille_combobox.get()
         sheet = fichier.worksheet(nom_feuille)
         votre_nom = nom_entry.get()
+
+        colonnes_produits = {
+            "D": "Menu Classic",
+            "E": "Menu Double",
+            "F": "Menu Contrat",
+            "G": "Tenders",
+            "H": "Petite Salade",
+            "I": "Boisson",
+            "J": "Milkshake"
+        }
+
         valeurs = {
             "D": int(menu_classic_combobox.get()),  # Menu Classic
             "E": int(menu_double_combobox.get()),  # Menu Double
@@ -111,10 +122,10 @@ def confirmer_vente():
             prix_total = calculer_prix_total()
 
             for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
-                            tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
+                             tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
                 combobox.set(0)
 
-            valeurs_nommees = {k: v for k, v in valeurs.items() if v > 0}
+            valeurs_nommees = {colonnes_produits[k]: v for k, v in valeurs.items() if v > 0}
             date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
             sauvegarder_ventes_json(date_aujourdhui, valeurs_nommees)
 
