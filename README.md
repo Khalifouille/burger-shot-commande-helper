@@ -1,12 +1,10 @@
+# <center>![Interface graphique](interface_graphique.png)</center>
+
 # Burger Shot Commande Helper 🍔👍
 
 **Gestion des commandes de Burger Shot en un clic 💻**
 
 Ce script est un outil d'aide pour la gestion des commandes de Burger Shot. Il permet de gérer les ventes, les clients et les préférences de manière efficace et intuitive. 🤩
-
-**Capture d'écran de l'interface graphique**
-
-# <center>![Interface graphique](interface_graphique.png)</center>
 
 **Fonctionnalités 🎉**
 
