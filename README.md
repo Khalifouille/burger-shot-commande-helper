@@ -1,4 +1,6 @@
-# <center>![Interface graphique](interface_graphique.png)</center>
+<p align="center" width="100%">
+    <img width="33%" src="interface_graphique.png"> 
+</p>
 
 # Burger Shot Commande Helper 🍔👍
 
