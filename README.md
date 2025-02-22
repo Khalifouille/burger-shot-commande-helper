@@ -6,7 +6,7 @@ Ce script est un outil d'aide pour la gestion des commandes de Burger Shot. Il p
 
 **Capture d'écran de l'interface graphique**
 
-![Interface graphique](interface_graphique.png)
+# <center>![Interface graphique](interface_graphique.png)</center>
 
 **Fonctionnalités 🎉**
 
