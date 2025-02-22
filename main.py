@@ -631,6 +631,35 @@ def retour():
         masquer_tous_les_elements()
         retour_button.grid_remove() 
 
+def charger_ventes_json():
+    if os.path.exists(VENTES_JSON_PATH) and os.path.getsize(VENTES_JSON_PATH) > 0:
+        with open(VENTES_JSON_PATH, "r") as f:
+            return json.load(f)
+    return {}
+
+def sauvegarder_ventes_json(data):
+    with open(VENTES_JSON_PATH, "w") as f:
+        json.dump(data, f, indent=4)
+
+def supprimer_vente(date, produit):
+    ventes = charger_ventes_json()
+    if date in ventes and produit in ventes[date]:
+        del ventes[date][produit]
+        if not ventes[date]:
+            del ventes[date]
+        sauvegarder_ventes_json(ventes)
+        return True
+    return False
+
+def modifier_vente(date, produit, nouvelle_quantite):
+    ventes = charger_ventes_json()
+    if date in ventes and produit in ventes[date]:
+        ventes[date][produit] = nouvelle_quantite
+        sauvegarder_ventes_json(ventes)
+        return True
+    return False
+
+
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
