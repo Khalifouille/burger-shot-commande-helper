@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-    <img width="33%" src="interface_graphique.png"> 
+    <img width="100%" src="interface_graphique.png"> 
 </p>
 
 # Burger Shot Commande Helper 🍔👍
