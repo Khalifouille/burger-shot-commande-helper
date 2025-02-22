@@ -8,15 +8,17 @@ import json
 import os
 import datetime
 import requests
-from webhook import webhook_url
+from webhook import WEBHOOK_URL
 import matplotlib.pyplot as plt
+import threading
 
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
+SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+CREDS_FILE = "api_key.json"
+VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
+CLIENTS_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\clients.json"
+
+creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", SCOPE)
 client = gspread.authorize(creds)
-
-fichier = None
-current_page = None
 
 fichiers_ids = {
     "Ventes civil": "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto",
@@ -35,9 +37,6 @@ prix_unitaires = {
 
 clients_list = []
 
-VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
-CLIENTS_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\clients.json"
-
 def get_sheet_names():
     global fichier
     try:
@@ -49,21 +48,21 @@ def get_sheet_names():
         return []
 
 def envoyer_webhook_discord(info_vente):
-    message = {"content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"}
-    try:
-        response = requests.post(webhook_url, json=message)
-        response.raise_for_status()
-        print("Webhook envoyé avec succès.")
-    except Exception as e:
-        print(f"Erreur lors de l'envoi du webhook : {e}")
+    def send():
+        message = {"content": f"Nouvelle vente enregistrée :\n{json.dumps(info_vente, indent=4)}"}
+        try:
+            response = requests.post(WEBHOOK_URL, json=message)
+            response.raise_for_status()
+            print("Webhook envoyé avec succès.")
+        except Exception as e:
+            print(f"Erreur lors de l'envoi du webhook : {e}")
+
+    threading.Thread(target=send).start()
 
 def trouver_premiere_ligne_vide(sheet):
     try:
         colonnes_b = sheet.col_values(4)
-        for i, valeur in enumerate(colonnes_b[5:], start=6):
-            if not valeur:
-                return i
-        return len(colonnes_b) + 1
+        return next((i for i, val in enumerate(colonnes_b[5:], start=6) if not val), len(colonnes_b) + 1)
     except Exception as e:
         print(f"Erreur lors de la recherche de la première cellule vide : {e}")
         return None
@@ -71,11 +70,7 @@ def trouver_premiere_ligne_vide(sheet):
 def trouver_ligne(sheet, nom):
     try:
         lignes = sheet.get_all_values()
-        for i, ligne in enumerate(lignes):
-            if nom in ligne:
-                return i + 1
-        print(f"Erreur : {nom} non trouvé dans la feuille.")
-        return None
+        return next((i + 1 for i, ligne in enumerate(lignes) if nom in ligne), None)
     except Exception as e:
         print(f"Erreur lors de la recherche de la ligne : {e}")
         return None
@@ -83,19 +78,13 @@ def trouver_ligne(sheet, nom):
 def ajouter_valeurs(sheet, ligne, valeurs):
     try:
         if isinstance(valeurs, dict):
-            mises_a_jour = []
-            for col, val in valeurs.items():
-                index_col = ord(col.upper()) - ord("A") + 1
-                cellule = sheet.cell(ligne, index_col).value
-                nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
-                mises_a_jour.append({"range": f"{col}{ligne}", "values": [[nouvelle_valeur]]})
+            mises_a_jour = [
+                {"range": f"{col}{ligne}", "values": [[str(int(sheet.cell(ligne, ord(col.upper()) - ord("A") + 1).value or 0) + val)]]}
+                for col, val in valeurs.items()
+            ]
             if mises_a_jour:
                 sheet.batch_update(mises_a_jour)
                 print("Valeurs mises à jour avec succès !")
-        elif isinstance(valeurs, list):
-            for valeur in valeurs:
-                ajouter_valeurs(sheet, ligne, valeur)
-                ligne += 1
     except Exception as e:
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
 
@@ -146,7 +135,7 @@ def confirmer_vente():
                 }
                 data = {"embeds": [embed]}
                 headers = {"Content-Type": "application/json"}
-                response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+                response = requests.post(WEBHOOK_URL, data=json.dumps(data), headers=headers)
                 if response.status_code != 204:
                     print(f"Erreur lors de l'envoi du webhook : {response.status_code}")
         else:
