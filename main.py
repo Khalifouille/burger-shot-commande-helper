@@ -316,7 +316,7 @@ def charger_fichier():
             resultat_label.config(text="Fichier chargé avec succès !")
             app.after(2000, lambda: resultat_label.config(text=""))
             fichiers_valides[fichier_id]()  
-            masquer_boutons_bilan_et_graphique()
+            masquer_boutons_premier_page()
         else:
             resultat_label.config(text="Erreur : ID de fichier invalide.")
     
@@ -616,9 +616,10 @@ def calculer_prix_total():
     except ValueError:
         prix_total_label.config(text="Prix total : 0 $")
 
-def masquer_boutons_bilan_et_graphique():
+def masquer_boutons_premier_page():
     bilan_button.grid_remove()
     graphique_button.grid_remove()
+    gestion_ventes_button.grid_remove()
 
 def retour():
     global current_page
