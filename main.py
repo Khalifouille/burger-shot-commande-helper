@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tkinter import simpledialog
 from tkcalendar import DateEntry
 from PIL import Image, ImageTk
 import gspread
@@ -659,6 +660,57 @@ def modifier_vente(date, produit, nouvelle_quantite):
         return True
     return False
 
+def ouvrir_gestion_ventes():
+    gestion_window = tk.Toplevel(app)
+    gestion_window.title("Gestion des Ventes")
+
+    date_label = tk.Label(gestion_window, text="Choisir une date :")
+    date_label.grid(row=0, column=0, padx=10, pady=10)
+    date_selector = DateEntry(gestion_window, date_pattern='yyyy-mm-dd')
+    date_selector.grid(row=0, column=1, padx=10, pady=10)
+
+    text_area = tk.Text(gestion_window, wrap=tk.WORD, width=80, height=20)
+    text_area.grid(row=1, column=0, columnspan=3, padx=10, pady=10)
+
+    afficher_button = tk.Button(gestion_window, text="Afficher les ventes", command=lambda: afficher_ventes_par_date(date_selector.get_date(), text_area))
+    afficher_button.grid(row=0, column=2, padx=10, pady=10)
+
+    supprimer_button = tk.Button(gestion_window, text="Supprimer une vente", command=lambda: supprimer_vente_interface(date_selector.get_date(), text_area))
+    supprimer_button.grid(row=2, column=0, padx=10, pady=10)
+
+    modifier_button = tk.Button(gestion_window, text="Modifier une vente", command=lambda: modifier_vente_interface(date_selector.get_date(), text_area))
+    modifier_button.grid(row=2, column=1, padx=10, pady=10)
+
+def afficher_ventes_par_date(date, text_area):
+    date_str = date.strftime('%Y-%m-%d')
+    ventes = charger_ventes_json()
+    text_area.delete(1.0, tk.END)
+    if date_str in ventes:
+        text_area.insert(tk.END, f"Ventes pour le {date_str} :\n")
+        for produit, quantite in ventes[date_str].items():
+            text_area.insert(tk.END, f"- {produit}: {quantite}\n")
+    else:
+        text_area.insert(tk.END, f"Aucune vente trouvée pour le {date_str}.\n")
+
+def supprimer_vente_interface(date, text_area):
+    date_str = date.strftime('%Y-%m-%d')
+    produit = simpledialog.askstring("Supprimer une vente", "Entrez le nom du produit à supprimer :")
+    if produit and supprimer_vente(date_str, produit):
+        messagebox.showinfo("Succès", f"La vente de {produit} a été supprimée.")
+        afficher_ventes_par_date(date, text_area)
+    else:
+        messagebox.showerror("Erreur", "Impossible de supprimer la vente.")
+
+def modifier_vente_interface(date, text_area):
+    date_str = date.strftime('%Y-%m-%d')
+    produit = simpledialog.askstring("Modifier une vente", "Entrez le nom du produit à modifier :")
+    if produit:
+        nouvelle_quantite = simpledialog.askinteger("Modifier une vente", f"Entrez la nouvelle quantité pour {produit} :")
+        if nouvelle_quantite is not None and modifier_vente(date_str, produit, nouvelle_quantite):
+            messagebox.showinfo("Succès", f"La vente de {produit} a été modifiée.")
+            afficher_ventes_par_date(date, text_area)
+        else:
+            messagebox.showerror("Erreur", "Impossible de modifier la vente.")
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -742,6 +794,9 @@ sauvegarder_preferences_button.grid(row=13, column=0, columnspan=3, padx=10, pad
 
 graphique_button = tk.Button(app, text="Générer le graphique des ventes", command=generer_graphique_ventes)
 graphique_button.grid(row=15, column=0, columnspan=3, padx=10, pady=10)
+
+gestion_ventes_button = tk.Button(app, text="Gérer les ventes", command=ouvrir_gestion_ventes)
+gestion_ventes_button.grid(row=16, column=0, columnspan=3, padx=10, pady=10)
 
 resultat_label = tk.Label(app, text="")
 
