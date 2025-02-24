@@ -487,6 +487,7 @@ def afficher_elements():
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
     retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
     sauvegarder_preferences_button.grid_remove()
+    prise_service_button.grid_remove()
     current_page = "ventes_civiles"
 
 def afficher_elements2():
@@ -505,6 +506,7 @@ def afficher_elements2():
     resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
     retour_button.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
     sauvegarder_preferences_button.grid_remove()
+    prise_service_button.grid_remove()
     
     current_page = "ventes_contrats"
 
