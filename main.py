@@ -491,8 +491,7 @@ def afficher_elements():
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
     retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
     sauvegarder_preferences_button.grid_remove()
-    fin_service_button.grid_remove()
-    prise_service_button.grid_remove()
+    bouton_service.grid_remove()
     current_page = "ventes_civiles"
 
 def afficher_elements2():
@@ -511,8 +510,7 @@ def afficher_elements2():
     resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
     retour_button.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
     sauvegarder_preferences_button.grid_remove()
-    fin_service_button.grid_remove()
-    prise_service_button.grid_remove()
+    bouton_service.grid_remove()
     current_page = "ventes_contrats"
 
 def masquer_elements():
@@ -649,58 +647,58 @@ def retour():
         masquer_tous_les_elements()
         retour_button.grid_remove() 
 
-def envoyer_prise_de_service():
+def prise_fin_service():
     global message_id, heure_debut, date_actuelle
 
-    heure_debut = datetime.datetime.now().strftime("%H:%M")
-    date_actuelle = datetime.datetime.now().strftime("%d/%m")
+    if bouton_service["text"] == "Prise de service":
+        heure_debut = datetime.datetime.now().strftime("%H:%M")
+        date_actuelle = datetime.datetime.now().strftime("%d/%m")
 
-    message = {
-        "content": f"**Prise de service :** {heure_debut}\n**Pause :** \n**Fin de service :** \n\n**Date :** {date_actuelle}"
-    }
+        message = {
+            "content": f"**Prise de service :** {heure_debut}\n**Pause :** \n**Fin de service :** \n\n**Date :** {date_actuelle}"
+        }
 
-    headers = {
-        "Authorization": USER_TOKEN,
-        "Content-Type": "application/json"
-    }
+        headers = {
+            "Authorization": USER_TOKEN,
+            "Content-Type": "application/json"
+        }
 
-    url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages"
+        url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages"
 
-    try:
-        response = requests.post(url, data=json.dumps(message), headers=headers)
-        response.raise_for_status()
-        message_id = response.json()["id"]
-        messagebox.showinfo("Succès", "Message de prise de service envoyé avec succès !")
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de l'envoi du message : {e}")
+        try:
+            response = requests.post(url, data=json.dumps(message), headers=headers)
+            response.raise_for_status()
+            message_id = response.json()["id"]  
+            bouton_service.config(text="Fin de service")
+            messagebox.showinfo("Succès", "Message de prise de service envoyé avec succès !")
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Erreur lors de l'envoi du message : {e}")
 
+    else:
+        if not message_id:
+            messagebox.showerror("Erreur", "Aucun message de prise de service n'a été envoyé.")
+            return
 
-def envoyer_fin_de_service():
-    global message_id, heure_debut, date_actuelle
+        heure_fin_service = datetime.datetime.now().strftime("%H:%M")
 
-    if not message_id:
-        messagebox.showerror("Erreur", "Aucun message de prise de service n'a été envoyé.")
-        return
+        message = {
+            "content": f"**Prise de service :** {heure_debut}\n**Pause :** \n**Fin de service :** {heure_fin_service}\n\n**Date :** {date_actuelle}"
+        }
 
-    heure_fin_service = datetime.datetime.now().strftime("%H:%M")
+        headers = {
+            "Authorization": USER_TOKEN,
+            "Content-Type": "application/json"
+        }
 
-    message = {
-        "content": f"**Prise de service :** {heure_debut}\n**Pause :** \n**Fin de service :** {heure_fin_service}\n\n**Date :** {date_actuelle}"
-    }
+        url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages/{message_id}"
 
-    headers = {
-        "Authorization": USER_TOKEN,
-        "Content-Type": "application/json"
-    }
-
-    url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages/{message_id}"
-
-    try:
-        response = requests.patch(url, data=json.dumps(message), headers=headers)
-        response.raise_for_status()
-        messagebox.showinfo("Succès", "Message de fin de service mis à jour avec succès !")
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
+        try:
+            response = requests.patch(url, data=json.dumps(message), headers=headers)
+            response.raise_for_status()
+            bouton_service.config(text="Prise de service")
+            messagebox.showinfo("Succès", "Message de fin de service mis à jour avec succès !")
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
 
 
 app = tk.Tk()
@@ -725,11 +723,8 @@ charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
 bilan_button = tk.Button(app, text="Afficher le bilan des ventes", command=obtenir_bilan_ventes_json)
 bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 
-prise_service_button = tk.Button(app, text="Prise de service", command=envoyer_prise_de_service)
-prise_service_button.grid(row=3, column=0, columnspan=3, padx=10, pady=20)
-
-fin_service_button = tk.Button(app, text="Fin de service", command=envoyer_fin_de_service)
-fin_service_button.grid(row=4, column=0, columnspan=3, padx=10, pady=10)
+bouton_service = tk.Button(app, text="Prise de service", command=prise_fin_service)
+bouton_service.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
