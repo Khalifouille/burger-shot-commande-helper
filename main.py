@@ -17,6 +17,7 @@ client = gspread.authorize(creds)
 
 fichier = None
 current_page = None
+message_id = None
 
 fichiers_ids = {
     "Ventes civil": "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto",
@@ -645,6 +646,8 @@ def retour():
         retour_button.grid_remove() 
 
 def envoyer_prise_de_service():
+    global message_id
+
     heure_actuelle = datetime.datetime.now().strftime("%H:%M")
     date_actuelle = datetime.datetime.now().strftime("%d/%m")
 
@@ -662,10 +665,38 @@ def envoyer_prise_de_service():
     try:
         response = requests.post(url, data=json.dumps(message), headers=headers)
         response.raise_for_status()
+        message_id = response.json()["id"]
         messagebox.showinfo("Succès", "Message de prise de service envoyé avec succès !")
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de l'envoi du message : {e}")
 
+
+def envoyer_fin_de_service():
+    global message_id
+
+    if not message_id:
+        messagebox.showerror("Erreur", "Aucun message de prise de service n'a été envoyé.")
+        return
+
+    heure_fin_service = datetime.datetime.now().strftime("%H:%M")
+
+    message = {
+        "content": f"**Prise de service :** [Heure initiale]\n**Pause :** \n**Fin de service :** {heure_fin_service}\n\n**Date :** [Date initiale]"
+    }
+
+    headers = {
+        "Authorization": USER_TOKEN,
+        "Content-Type": "application/json"
+    }
+
+    url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages/{message_id}"
+
+    try:
+        response = requests.patch(url, data=json.dumps(message), headers=headers)
+        response.raise_for_status()
+        messagebox.showinfo("Succès", "Message de fin de service mis à jour avec succès !")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
