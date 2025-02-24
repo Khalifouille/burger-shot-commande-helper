@@ -491,7 +491,7 @@ def afficher_elements():
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
     retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
     sauvegarder_preferences_button.grid_remove()
-    bouton_service.grid_remove()
+    #bouton_service.grid_remove()
     current_page = "ventes_civiles"
 
 def afficher_elements2():
@@ -510,7 +510,7 @@ def afficher_elements2():
     resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
     retour_button.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
     sauvegarder_preferences_button.grid_remove()
-    bouton_service.grid_remove()
+    #bouton_service.grid_remove()
     current_page = "ventes_contrats"
 
 def masquer_elements():
@@ -669,7 +669,7 @@ def prise_fin_service():
             response = requests.post(url, data=json.dumps(message), headers=headers)
             response.raise_for_status()
             message_id = response.json()["id"]  
-            bouton_service.config(text="Fin de service")
+            bouton_service.config(text="Fin de service", bg="red")  
             messagebox.showinfo("Succès", "Message de prise de service envoyé avec succès !")
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de l'envoi du message : {e}")
@@ -695,7 +695,7 @@ def prise_fin_service():
         try:
             response = requests.patch(url, data=json.dumps(message), headers=headers)
             response.raise_for_status()
-            bouton_service.config(text="Prise de service")
+            bouton_service.config(text="Prise de service", bg="green")
             messagebox.showinfo("Succès", "Message de fin de service mis à jour avec succès !")
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
@@ -723,8 +723,8 @@ charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
 bilan_button = tk.Button(app, text="Afficher le bilan des ventes", command=obtenir_bilan_ventes_json)
 bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 
-bouton_service = tk.Button(app, text="Prise de service", command=prise_fin_service)
-bouton_service.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
+bouton_service = tk.Button(app, text="Prise de service", command=prise_fin_service, bg="green")
+bouton_service.grid(row=16, column=0, columnspan=3, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
