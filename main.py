@@ -8,7 +8,7 @@ import json
 import os
 import datetime
 import requests
-from webhook import WEBHOOK_URL
+from webhook import WEBHOOK_URL, USER_TOKEN, CHANNEL_ID
 import matplotlib.pyplot as plt
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -642,6 +642,29 @@ def retour():
         masquer_tous_les_elements()
         retour_button.grid_remove() 
 
+def envoyer_prise_de_service():
+    heure_actuelle = datetime.datetime.now().strftime("%H:%M")
+    date_actuelle = datetime.datetime.now().strftime("%d/%m")
+
+    message = {
+        "content": "**Prise de service :** " + heure_actuelle + "\n**Pause :** \n**Fin de service :** \n\n**Date :** " + date_actuelle
+    }
+
+    headers = {
+        "Authorization": USER_TOKEN,
+        "Content-Type": "application/json"
+    }
+
+    url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages"
+
+    try:
+        response = requests.post(url, data=json.dumps(message), headers=headers)
+        response.raise_for_status()
+        messagebox.showinfo("Succès", "Message de prise de service envoyé avec succès !")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de l'envoi du message : {e}")
+
+
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
@@ -663,6 +686,9 @@ charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
 
 bilan_button = tk.Button(app, text="Afficher le bilan des ventes", command=obtenir_bilan_ventes_json)
 bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
+
+prise_service_button = tk.Button(app, text="Prise de service", command=envoyer_prise_de_service)
+prise_service_button.grid(row=3, column=0, columnspan=3, padx=10, pady=20)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
