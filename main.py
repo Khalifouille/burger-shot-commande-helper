@@ -723,6 +723,9 @@ bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 prise_service_button = tk.Button(app, text="Prise de service", command=envoyer_prise_de_service)
 prise_service_button.grid(row=3, column=0, columnspan=3, padx=10, pady=20)
 
+fin_service_button = tk.Button(app, text="Fin de service", command=envoyer_fin_de_service)
+fin_service_button.grid(row=4, column=1, padx=10, pady=10)
+
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
 
