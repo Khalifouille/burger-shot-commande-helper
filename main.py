@@ -138,6 +138,7 @@ def confirmer_vente():
             for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
                              tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
                 combobox.set(0)
+            calculer_prix_total()
 
             valeurs_nommees = {colonnes_produits[k]: v for k, v in valeurs.items() if v > 0}
             date_aujourdhui = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -490,6 +491,7 @@ def afficher_elements():
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
     retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
     sauvegarder_preferences_button.grid_remove()
+    fin_service_button.grid_remove()
     prise_service_button.grid_remove()
     current_page = "ventes_civiles"
 
@@ -509,8 +511,8 @@ def afficher_elements2():
     resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
     retour_button.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
     sauvegarder_preferences_button.grid_remove()
+    fin_service_button.grid_remove()
     prise_service_button.grid_remove()
-    
     current_page = "ventes_contrats"
 
 def masquer_elements():
@@ -727,7 +729,7 @@ prise_service_button = tk.Button(app, text="Prise de service", command=envoyer_p
 prise_service_button.grid(row=3, column=0, columnspan=3, padx=10, pady=20)
 
 fin_service_button = tk.Button(app, text="Fin de service", command=envoyer_fin_de_service)
-fin_service_button.grid(row=4, column=1, padx=10, pady=10)
+fin_service_button.grid(row=4, column=0, columnspan=3, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
