@@ -111,8 +111,12 @@ def ajouter_valeurs(sheet, ligne, valeurs):
             mises_a_jour = []
             for col, val in valeurs.items():
                 index_col = ord(col.upper()) - ord("A") + 1
-                cellule = sheet.cell(ligne, index_col).value
-                nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
+                if col == 'F': 
+                    nouvelle_valeur = True if val else False
+                else:
+                    cellule = sheet.cell(ligne, index_col).value
+                    nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
+                
                 mises_a_jour.append({"range": f"{col}{ligne}", "values": [[nouvelle_valeur]]})
             if mises_a_jour:
                 sheet.batch_update(mises_a_jour)
@@ -221,7 +225,7 @@ def confirmer_vente2():
                 "B": str(nom2_entry.get()),     # Vendeur
                 "D": client.strip(),            # Client
                 "E": date_aujourdhui,           # Date du jour
-                "F": "TRUE"                     # Case à cocher
+                "F": True                       # Case à cocher
             })
         
         ligne = trouver_premiere_ligne_vide(sheet)
