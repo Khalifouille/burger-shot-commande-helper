@@ -689,31 +689,37 @@ def prise_fin_service():
             messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
 
 def pause_service():
-    global pause_debut, pause_fin
+    global pause_debut
+
+    pause_debut = datetime.datetime.now().strftime("%H:%M")
+    bouton_pause.config(state=tk.DISABLED, bg="gray") 
+    bouton_reprise.config(state=tk.NORMAL, bg="yellow") 
+    messagebox.showinfo("Succès", "Pause de service enregistrée.")
+
+def reprise_service():
+    global pause_fin
+
+    pause_fin = datetime.datetime.now().strftime("%H:%M")
+
+    message = {
+        "content": f"**Prise de service :** {heure_debut}\n**Pause :** {pause_debut} - {pause_fin}\n**Fin de service :** \n\n**Date :** {date_actuelle}"
+    }
+
     headers = {
         "Authorization": USER_TOKEN,
         "Content-Type": "application/json"
     }
 
-    if bouton_service["text"] == "Pause de service":
-        pause_debut = datetime.datetime.now().strftime("%H:%M")
-        bouton_service.config(text="Reprise de service", bg="yellow")
-        messagebox.showinfo("Succès", "Pause de service enregistrée.")
+    url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages/{message_id}"
 
-    elif bouton_service["text"] == "Reprise de service":
-        pause_fin = datetime.datetime.now().strftime("%H:%M")
-        message = {
-            "content": f"**Prise de service :** {heure_debut}\n**Pause :** {pause_debut} - {pause_fin}\n**Fin de service :** \n\n**Date :** {date_actuelle}"
-        }
-        url = f"https://discord.com/api/v9/channels/{CHANNEL_ID}/messages/{message_id}"
-
-        try:
-            response = requests.patch(url, data=json.dumps(message), headers=headers)
-            response.raise_for_status()
-            bouton_service.config(text="Fin de service", bg="red")
-            messagebox.showinfo("Succès", "Reprise de service enregistrée et message mis à jour.")
-        except Exception as e:
-            messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
+    try:
+        response = requests.patch(url, data=json.dumps(message), headers=headers)
+        response.raise_for_status()
+        bouton_reprise.config(state=tk.DISABLED, bg="gray") 
+        bouton_fin_service.config(state=tk.NORMAL, bg="red") 
+        messagebox.showinfo("Succès", "Reprise de service enregistrée et message mis à jour.")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
 
 
 app = tk.Tk()
@@ -741,8 +747,8 @@ bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 bouton_service = tk.Button(app, text="Prise de service", command=prise_fin_service, bg="green")
 bouton_service.grid(row=16, column=0, columnspan=3, padx=10, pady=10)
 
-bouton_service = tk.Button(app, text="Pause de service", command=pause_service, bg="orange")
-bouton_service.grid(row=17, column=0, columnspan=3, padx=10, pady=10)
+bouton_pause_service = tk.Button(app, text="Pause de service", command=pause_service, bg="orange")
+bouton_pause_service.grid(row=17, column=0, columnspan=3, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
