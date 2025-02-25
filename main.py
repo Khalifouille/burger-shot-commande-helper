@@ -704,7 +704,7 @@ def prise_fin_service():
             response = requests.patch(url, data=json.dumps(message), headers=headers)
             response.raise_for_status()
             bouton_service.config(text="Prise de service", bg="green")
-            bouton_pause_reprise.config(state=tk.DISABLED, bg="gray", text="Pause/Reprise")
+            bouton_pause_reprise.config(state=tk.DISABLED, bg="orange", text="Pause/Reprise")
             messagebox.showinfo("Succès", "Message de fin de service mis à jour avec succès !")
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
@@ -714,7 +714,7 @@ def pause_reprise_service():
     
     if not en_pause:
         pause_debut = datetime.datetime.now().strftime("%H:%M")
-        bouton_pause_reprise.config(text="Reprise de service", bg="yellow")
+        bouton_pause_reprise.config(text="Reprise de service", bg="orange")
         en_pause = True
         messagebox.showinfo("Succès", "Pause de service enregistrée.")
     else:  
@@ -765,8 +765,8 @@ bilan_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 bouton_service = tk.Button(app, text="Prise de service", command=prise_fin_service, bg="green")
 bouton_service.grid(row=16, column=0, columnspan=3, padx=10, pady=10)
 
-bouton_pause_reprise = tk.Button(app, text="Pause de service", command=pause_reprise_service, bg="orange", state=tk.DISABLED)
-bouton_pause_reprise.grid(row=5, column=0, columnspan=3, padx=10, pady=10)
+bouton_pause_reprise = tk.Button(app, text="Pause/Reprise", command=pause_reprise_service, bg="orange", state=tk.DISABLED)
+bouton_pause_reprise.grid(row=17, column=0, columnspan=3, padx=10, pady=10)
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
