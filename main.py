@@ -105,28 +105,33 @@ def afficher_elements_accueil():
     current_page = "accueil"
 
 
-def ajouter_valeurs(sheet, ligne, valeurs):
+def ajouter_valeurs(sheet, ligne, valeurs, case_a_cocher=False):
     try:
         if isinstance(valeurs, dict):
             mises_a_jour = []
             for col, val in valeurs.items():
                 index_col = ord(col.upper()) - ord("A") + 1
-                if col == 'F': 
-                    nouvelle_valeur = True if val else False
+                
+                # Si la colonne est 'F' et que 'case_a_cocher' est True, traiter comme case à cocher
+                if col == 'F' and case_a_cocher:
+                    nouvelle_valeur = True if val else False  # Cocher ou décocher la case
                 else:
+                    # Sinon, traiter comme une valeur texte ou autre type de donnée
                     cellule = sheet.cell(ligne, index_col).value
                     nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
                 
                 mises_a_jour.append({"range": f"{col}{ligne}", "values": [[nouvelle_valeur]]})
+            
             if mises_a_jour:
                 sheet.batch_update(mises_a_jour)
                 print("Valeurs mises à jour avec succès !")
         elif isinstance(valeurs, list):
             for valeur in valeurs:
-                ajouter_valeurs(sheet, ligne, valeur)
+                ajouter_valeurs(sheet, ligne, valeur, case_a_cocher)
                 ligne += 1
     except Exception as e:
         print(f"Erreur lors de la mise à jour des valeurs : {e}")
+
 
 def confirmer_vente():
     global fichier
