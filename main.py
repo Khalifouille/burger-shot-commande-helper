@@ -85,6 +85,26 @@ def trouver_ligne(sheet, nom):
         print(f"Erreur lors de la recherche de la ligne : {e}")
         return None
 
+def afficher_elements_accueil():
+    global current_page
+    masquer_tous_les_elements() 
+
+    titre_label.grid(row=0, column=0, columnspan=3, pady=10)
+    feuille_id_label.grid(row=1, column=0, padx=10, pady=10)
+    feuille_id_combobox.grid(row=1, column=1, padx=10, pady=10)
+    charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
+
+    bilan_button.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
+    graphique_button.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
+
+    bouton_service.grid(row=4, column=0, columnspan=3, padx=10, pady=10)
+    bouton_pause_reprise.grid(row=5, column=0, columnspan=3, padx=10, pady=10)
+
+    sauvegarder_preferences_button.grid(row=6, column=0, columnspan=3, padx=10, pady=10)
+
+    current_page = "accueil"
+
+
 def ajouter_valeurs(sheet, ligne, valeurs):
     try:
         if isinstance(valeurs, dict):
@@ -493,7 +513,8 @@ def afficher_elements():
     resultat_label.grid(row=13, column=0, columnspan=3, padx=10, pady=10)
     retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
     sauvegarder_preferences_button.grid_remove()
-    #bouton_service.grid_remove()
+    bouton_service.grid_remove()
+    bouton_pause_reprise.grid_remove()
     current_page = "ventes_civiles"
 
 def afficher_elements2():
@@ -512,7 +533,8 @@ def afficher_elements2():
     resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
     retour_button.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
     sauvegarder_preferences_button.grid_remove()
-    #bouton_service.grid_remove()
+    bouton_service.grid_remove()
+    bouton_pause_reprise.grid_remove()
     current_page = "ventes_contrats"
 
 def masquer_elements():
@@ -638,16 +660,9 @@ def masquer_boutons_bilan_et_graphique():
     graphique_button.grid_remove()
 
 def retour():
-    global current_page
-    if current_page == "ventes_civiles":
-        masquer_elements()
-        afficher_elements2()  
-    elif current_page == "ventes_contrats":
-        masquer_elements2()
-        afficher_elements()  
-    else:
-        masquer_tous_les_elements()
-        retour_button.grid_remove() 
+    masquer_tous_les_elements()  
+    afficher_elements_accueil()  
+    current_page = "accueil" 
 
 def prise_fin_service():
     global message_id, heure_debut, date_actuelle, pause_debut, pause_fin, en_pause
@@ -762,7 +777,7 @@ nom2_entry = tk.Entry(app)
 client_label = tk.Label(app, text="Client :")
 client_entry = tk.Entry(app)
 
-retour_button = tk.Button(app, text="Switch Page", command=retour)
+retour_button = tk.Button(app, text="Page Acceuil", command=retour)
 retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 retour_button.grid_remove() 
 
