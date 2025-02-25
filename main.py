@@ -112,16 +112,14 @@ def ajouter_valeurs(sheet, ligne, valeurs, case_a_cocher=False):
             for col, val in valeurs.items():
                 index_col = ord(col.upper()) - ord("A") + 1
                 
-                # Si la colonne est 'F' et que 'case_a_cocher' est True, traiter comme case à cocher
                 if col == 'F' and case_a_cocher:
-                    nouvelle_valeur = True if val else False  # Cocher ou décocher la case
+                    nouvelle_valeur = val  
                 else:
-                    # Sinon, traiter comme une valeur texte ou autre type de donnée
                     cellule = sheet.cell(ligne, index_col).value
                     nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
                 
                 mises_a_jour.append({"range": f"{col}{ligne}", "values": [[nouvelle_valeur]]})
-            
+
             if mises_a_jour:
                 sheet.batch_update(mises_a_jour)
                 print("Valeurs mises à jour avec succès !")
@@ -162,7 +160,7 @@ def confirmer_vente():
 
         ligne = trouver_ligne(sheet, votre_nom)
         if ligne:
-            ajouter_valeurs(sheet, ligne, valeurs)
+            ajouter_valeurs(sheet, ligne, valeurs, case_a_cocher=False)
             resultat_label.config(text="Vente enregistrée avec succès !")
             prix_total = calculer_prix_total()
 
@@ -235,7 +233,7 @@ def confirmer_vente2():
         
         ligne = trouver_premiere_ligne_vide(sheet)
         if ligne:
-            ajouter_valeurs(sheet, ligne, valeurs)
+            ajouter_valeurs(sheet, ligne, valeurs, case_a_cocher=True)
             resultat_label.config(text="Vente enregistrée avec succès !")
             client_combobox.set('')
             date_entry.set_date(datetime.datetime.now())
