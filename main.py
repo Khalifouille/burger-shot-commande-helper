@@ -745,6 +745,7 @@ def pause_reprise_service():
         pause_debut = datetime.datetime.now().strftime("%H:%M")
         pause_start_time = time.time()
         pause_timer_running = True
+        pause_timer_label.grid()  
         mettre_a_jour_timer_pause()
         bouton_pause_reprise.config(text="Reprise de service", bg="orange")
         en_pause = True
@@ -752,6 +753,7 @@ def pause_reprise_service():
     else:  
         pause_fin = datetime.datetime.now().strftime("%H:%M")
         pause_timer_running = False
+        pause_timer_label.grid_remove()
         message = {
             "content": f"**Prise de service :** {heure_debut}\n**Pause :** {pause_debut} - {pause_fin}\n**Fin de service :** \n\n**Date :** {date_actuelle}"
         }
@@ -771,7 +773,6 @@ def pause_reprise_service():
             messagebox.showinfo("Succès", "Reprise de service enregistrée et message mis à jour.")
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
-
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
@@ -809,7 +810,7 @@ bouton_pause_reprise = tk.Button(app, text="Pause/Reprise", command=pause_repris
 bouton_pause_reprise.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
 
 pause_timer_label = tk.Label(app, text="Pause: 00:00:00")
-pause_timer_label.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+pause_timer_label.grid(row=18, column=0, columnspan=3, padx=10, pady=10, sticky="w")
 pause_timer_label.grid_remove()
 
 nom_label = tk.Label(app, text="Votre nom :")
