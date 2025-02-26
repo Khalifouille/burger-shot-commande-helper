@@ -11,6 +11,10 @@ import requests
 from webhook import WEBHOOK_URL, USER_TOKEN, CHANNEL_ID
 import matplotlib.pyplot as plt
 
+VENTES_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "ventes.json")
+CLIENTS_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "clients.json")
+PREFERENCES_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "preferences.json")
+
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
 client = gspread.authorize(creds)
@@ -47,8 +51,12 @@ def get_sheet_names():
     global fichier
     try:
         if fichier:
-            return [feuille.title for feuille in fichier.worksheets()]
-        return []
+            feuilles = fichier.worksheets()
+            print("Feuilles récupérées depuis l'API :", [feuille.title for feuille in feuilles])
+            return [feuille.title for feuille in feuilles]
+        else:
+            print("Erreur : Aucun fichier Google Sheets chargé.")
+            return []
     except Exception as e:
         print(f"Erreur lors de la récupération des feuilles : {e}")
         return []
@@ -594,6 +602,8 @@ def sauvegarder_ventes_json(date, ventes):
         with open(VENTES_JSON_PATH, "w") as f:
             json.dump(data, f, indent=4)
         print(f"Ventes sauvegardées pour la date {date}.")
+    except json.JSONDecodeError:
+        messagebox.showerror("Erreur", "Le fichier de ventes est corrompu.")
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde des ventes : {e}")
 
@@ -612,15 +622,13 @@ def get_sheet_names():
         return []
 
 def charger_preferences():
-    dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
-    chemin_fichier = os.path.join(dossier_preferences, "preferences.json")
     try:
-        with open(chemin_fichier, "r") as f:
+        with open(PREFERENCES_JSON_PATH, "r") as f:
             preferences = json.load(f)
             print(f"Préférences chargées : {preferences}")
             nom_entry.insert(0, preferences.get("nom", ""))
             nom2_entry.insert(0, preferences.get("vendeur", ""))
-            feuille_combobox.insert(0,preferences.get("feuille", ""))
+            feuille_combobox.insert(0, preferences.get("feuille", ""))
             feuille_id_combobox.set(preferences.get("fichier_id", ""))
             fichier_id = preferences.get("fichier_id", "")
             if fichier_id and fichier_id in fichiers_ids:
@@ -642,6 +650,8 @@ def charger_preferences():
                 fichier = None
     except FileNotFoundError:
         print("Fichier de préférences non trouvé.")
+    except json.JSONDecodeError:
+        print("Le fichier de préférences est corrompu.")
     except Exception as e:
         print(f"Erreur lors du chargement des préférences : {e}")
 
