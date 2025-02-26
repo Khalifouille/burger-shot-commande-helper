@@ -10,6 +10,7 @@ import datetime
 import requests
 from webhook import WEBHOOK_URL, USER_TOKEN, CHANNEL_ID
 import matplotlib.pyplot as plt
+import time
 
 VENTES_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "ventes.json")
 CLIENTS_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "clients.json")
@@ -26,6 +27,9 @@ heure_debut = None
 date_actuelle = None
 pause_debut = None
 pause_fin = None
+pause_timer_label = None
+pause_start_time = None
+pause_timer_running = False
 
 fichiers_ids = {
     "Ventes civil": "1aP0wCHs4sxfbYwd68Kj-lPi75P4awfCZcJcKvuh_wto",
@@ -726,16 +730,28 @@ def prise_fin_service():
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
 
+def mettre_a_jour_timer_pause():
+    if pause_timer_running:
+        elapsed_time = time.time() - pause_start_time
+        hours, remainder = divmod(elapsed_time, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        pause_timer_label.config(text=f"Pause: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
+        app.after(1000, mettre_a_jour_timer_pause)
+
 def pause_reprise_service():
-    global pause_debut, pause_fin, en_pause
+    global pause_debut, pause_fin, en_pause, pause_start_time, pause_timer_running
     
     if not en_pause:
         pause_debut = datetime.datetime.now().strftime("%H:%M")
+        pause_start_time = time.time()
+        pause_timer_running = True
+        mettre_a_jour_timer_pause()
         bouton_pause_reprise.config(text="Reprise de service", bg="orange")
         en_pause = True
         messagebox.showinfo("Succès", "Pause de service enregistrée.")
     else:  
         pause_fin = datetime.datetime.now().strftime("%H:%M")
+        pause_timer_running = False
         message = {
             "content": f"**Prise de service :** {heure_debut}\n**Pause :** {pause_debut} - {pause_fin}\n**Fin de service :** \n\n**Date :** {date_actuelle}"
         }
@@ -791,6 +807,10 @@ bouton_service.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky="ew"
 
 bouton_pause_reprise = tk.Button(app, text="Pause/Reprise", command=pause_reprise_service, bg="orange", state=tk.DISABLED)
 bouton_pause_reprise.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+
+pause_timer_label = tk.Label(app, text="Pause: 00:00:00")
+pause_timer_label.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
+pause_timer_label.grid_remove()
 
 nom_label = tk.Label(app, text="Votre nom :")
 nom_entry = tk.Entry(app)
