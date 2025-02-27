@@ -415,29 +415,34 @@ def obtenir_bilan_ventes_json():
         
         item_label = tk.Label(bilan_window, text="Item :")
         item_label.grid(row=2, column=0, padx=10, pady=10)
-        item_entry = tk.Entry(bilan_window)
-        item_entry.grid(row=2, column=1, padx=10, pady=10)
+        item_combobox = ttk.Combobox(bilan_window, values=list(prix_unitaires.keys()))
+        item_combobox.grid(row=2, column=1, padx=10, pady=10)
         
         quantite_label = tk.Label(bilan_window, text="Quantité :")
         quantite_label.grid(row=3, column=0, padx=10, pady=10)
-        quantite_entry = tk.Entry(bilan_window)
-        quantite_entry.grid(row=3, column=1, padx=10, pady=10)
+        quantite_combobox = ttk.Combobox(bilan_window, values=["Supérieur à", "Inférieur à", "Égal à"])
+        quantite_combobox.grid(row=3, column=1, padx=10, pady=10)
+        
+        quantite_value_label = tk.Label(bilan_window, text="Valeur :")
+        quantite_value_label.grid(row=4, column=0, padx=10, pady=10)
+        quantite_value_entry = tk.Entry(bilan_window)
+        quantite_value_entry.grid(row=4, column=1, padx=10, pady=10)
         
         total_ventes_label = tk.Label(bilan_window, text="Total des ventes : 0 $")
-        total_ventes_label.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+        total_ventes_label.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
         
-        afficher_button = tk.Button(bilan_window, text="Afficher les ventes", command=lambda: afficher_ventes_par_date_range(data, date_debut_selector.get_date(), date_fin_selector.get_date(), item_entry.get(), quantite_entry.get(), text_area, total_ventes_label))
-        afficher_button.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
+        afficher_button = tk.Button(bilan_window, text="Afficher les ventes", command=lambda: afficher_ventes_par_date_range(data, date_debut_selector.get_date(), date_fin_selector.get_date(), item_combobox.get(), quantite_combobox.get(), quantite_value_entry.get(), text_area, total_ventes_label))
+        afficher_button.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
         
         text_area = tk.Text(bilan_window, wrap=tk.WORD, width=80, height=20)
-        text_area.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+        text_area.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
 
     except json.JSONDecodeError:
         messagebox.showerror("Erreur", "Le fichier de ventes est vide ou corrompu.")
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de la récupération du bilan des ventes : {e}")
 
-def afficher_ventes_par_date_range(data, date_debut, date_fin, item, quantite, text_area, total_ventes_label):
+def afficher_ventes_par_date_range(data, date_debut, date_fin, item, quantite_option, quantite_value, text_area, total_ventes_label):
     try:
         date_debut_str = date_debut.strftime('%Y-%m-%d')
         date_fin_str = date_fin.strftime('%Y-%m-%d')
@@ -455,9 +460,19 @@ def afficher_ventes_par_date_range(data, date_debut, date_fin, item, quantite, t
                     text_area.insert(tk.END, "  Aucune vente pour cette date.\n")
                 else:
                     for produit, quantite_vendue in ventes.items():
-                        if (not item or item.lower() in produit.lower()) and (not quantite or quantite == str(quantite_vendue)):
-                            text_area.insert(tk.END, f"  {produit}: {quantite_vendue}\n")
-                            total_ventes += quantite_vendue * prix_unitaires.get(produit, 0)
+                        if (not item or item.lower() in produit.lower()):
+                            if quantite_option == "Supérieur à" and quantite_value and quantite_vendue > int(quantite_value):
+                                text_area.insert(tk.END, f"  {produit}: {quantite_vendue}\n")
+                                total_ventes += quantite_vendue * prix_unitaires.get(produit, 0)
+                            elif quantite_option == "Inférieur à" and quantite_value and quantite_vendue < int(quantite_value):
+                                text_area.insert(tk.END, f"  {produit}: {quantite_vendue}\n")
+                                total_ventes += quantite_vendue * prix_unitaires.get(produit, 0)
+                            elif quantite_option == "Égal à" and quantite_value and quantite_vendue == int(quantite_value):
+                                text_area.insert(tk.END, f"  {produit}: {quantite_vendue}\n")
+                                total_ventes += quantite_vendue * prix_unitaires.get(produit, 0)
+                            elif not quantite_option:
+                                text_area.insert(tk.END, f"  {produit}: {quantite_vendue}\n")
+                                total_ventes += quantite_vendue * prix_unitaires.get(produit, 0)
                 text_area.insert(tk.END, "\n")
                 ventes_trouvees = True
         
