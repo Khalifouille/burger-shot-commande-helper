@@ -49,9 +49,6 @@ prix_unitaires = {
 clients_list = []
 clients_feuilles = {}
 
-VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
-CLIENTS_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\clients.json"
-
 def get_sheet_names():
     global fichier
     try:
@@ -805,6 +802,18 @@ def pause_reprise_service():
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de la mise à jour du message : {e}")
 
+def supprimer_client():
+    client = client_combobox.get().strip()
+    if client in clients_list:
+        clients_list.remove(client)
+        del clients_feuilles[client]
+        client_combobox["values"] = clients_list
+        client_combobox.set('')
+        sauvegarder_clients_json()
+        resultat_label.config(text=f"Client '{client}' supprimé avec succès.")
+    else:
+        resultat_label.config(text="Erreur : Client non trouvé.")
+
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
@@ -858,6 +867,9 @@ retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 retour_button.grid_remove() 
 
 client_combobox = ttk.Combobox(app, values=clients_list)
+
+supprimer_client_button = tk.Button(app, text="-", command=supprimer_client, bg="red", fg="white")
+supprimer_client_button.grid(row=4, column=2, padx=10, pady=10, sticky="ew")
 
 date_label = tk.Label(app, text="Date :")
 date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
