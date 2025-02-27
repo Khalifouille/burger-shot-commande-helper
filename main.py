@@ -826,6 +826,16 @@ def filtrer_clients(event):
     else:
         client_combobox['values'] = clients_list
 
+def valider_quantite(event):
+    try:
+        combobox = event.widget
+        quantite = int(combobox.get())
+        combobox.set(quantite)
+        calculer_prix_total()
+    except ValueError:
+        combobox.set(0)
+        calculer_prix_total()
+
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
@@ -934,6 +944,7 @@ resultat_label = tk.Label(app, text="")
 for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
                  tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
     combobox.bind("<<ComboboxSelected>>", lambda event: calculer_prix_total())
+    combobox.bind("<Return>", valider_quantite)
 
 client_combobox.bind("<<ComboboxSelected>>", mettre_a_jour_feuille_selectionnee)
 
