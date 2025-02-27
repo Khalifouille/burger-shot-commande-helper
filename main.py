@@ -47,6 +47,7 @@ prix_unitaires = {
 }
 
 clients_list = []
+clients_feuilles = {}
 
 VENTES_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\ventes.json"
 CLIENTS_JSON_PATH = "C:\\Users\\PC GAMER\\AppData\\Roaming\\burger_shot_commande_helper\\clients.json"
@@ -228,8 +229,12 @@ def confirmer_vente2():
         for client in clients:
             if client and client not in clients_list:
                 clients_list.append(client)
+                clients_feuilles[client] = nom_feuille
                 print(f"Client '{client}' ajouté avec succès.")
-        
+            elif client in clients_feuilles and clients_feuilles[client] != nom_feuille:
+                clients_feuilles[client] = nom_feuille 
+                print(f"Client '{client}' mis à jour avec la feuille '{nom_feuille}'.")
+
         if clients:
             client_combobox["values"] = clients_list
             sauvegarder_clients_json()
@@ -493,6 +498,21 @@ def generer_graphique_ventes():
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de la génération du graphique : {e}")
 
+def charger_clients_json():
+    try:
+        dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
+        chemin_fichier = os.path.join(dossier_preferences, "clients.json")
+
+        if os.path.exists(chemin_fichier):
+            with open(chemin_fichier, "r") as f:
+                global clients_list, clients_feuilles
+                data = json.load(f)
+                clients_list = data.get("clients", [])
+                clients_feuilles = data.get("clients_feuilles", {})
+                print("Clients chargés avec succès.")
+    except Exception as e:
+        print(f"Erreur lors du chargement des clients : {e}")
+
 def sauvegarder_clients_json():
     try:
         dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
@@ -502,23 +522,10 @@ def sauvegarder_clients_json():
         chemin_fichier = os.path.join(dossier_preferences, "clients.json")
 
         with open(chemin_fichier, "w") as f:
-            json.dump(clients_list, f, indent=4)
+            json.dump({"clients": clients_list, "clients_feuilles": clients_feuilles}, f, indent=4)
         print("Clients sauvegardés avec succès.")
     except Exception as e:
         print(f"Erreur lors de la sauvegarde des clients : {e}")
-
-def charger_clients_json():
-    try:
-        dossier_preferences = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper")
-        chemin_fichier = os.path.join(dossier_preferences, "clients.json")
-
-        if os.path.exists(chemin_fichier):
-            with open(chemin_fichier, "r") as f:
-                global clients_list
-                clients_list = json.load(f)
-                print("Clients chargés avec succès.")
-    except Exception as e:
-        print(f"Erreur lors du chargement des clients : {e}")
 
 def masquer_tous_les_elements():
     masquer_elements()
