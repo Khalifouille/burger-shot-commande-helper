@@ -562,6 +562,7 @@ def afficher_elements():
     sauvegarder_preferences_button.grid_remove()
     bouton_service.grid_remove()
     bouton_pause_reprise.grid_remove()
+    supprimer_client_button.grid_remove()
     current_page = "ventes_civiles"
 
 def afficher_elements2():
@@ -579,6 +580,7 @@ def afficher_elements2():
     confirmer_button2.grid(row=6, column=0, columnspan=3, padx=15, pady=15)
     resultat_label.grid(row=7, column=0, columnspan=3, padx=15, pady=10)
     retour_button.grid(row=8, column=0, columnspan=3, padx=15, pady=10)
+    supprimer_client_button.grid(row=4, column=3, padx=1, pady=1, sticky="ew")
     sauvegarder_preferences_button.grid_remove()
     bouton_service.grid_remove()
     bouton_pause_reprise.grid_remove()
@@ -595,7 +597,7 @@ def masquer_elements():
 
 def masquer_elements2():
     elements_a_cacher = [feuille_label, feuille_combobox, nom2_label, nom2_entry, client_label, client_entry,
-                         client_combobox, date_label, date_entry, confirmer_button2, resultat_label]
+                         client_combobox, date_label, date_entry, confirmer_button2, resultat_label, supprimer_client_button]
     for elem in elements_a_cacher:
         elem.grid_remove()
 
@@ -868,8 +870,7 @@ retour_button.grid_remove()
 
 client_combobox = ttk.Combobox(app, values=clients_list)
 
-supprimer_client_button = tk.Button(app, text="-", command=supprimer_client, bg="red", fg="white")
-supprimer_client_button.grid(row=4, column=2, padx=10, pady=10, sticky="ew")
+supprimer_client_button = tk.Button(app, text="-", command=supprimer_client, fg="black", width=0, height=0)
 
 date_label = tk.Label(app, text="Date :")
 date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
