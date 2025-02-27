@@ -326,7 +326,6 @@ def mettre_a_jour_feuille_selectionnee(event):
     if client in clients_feuilles:
         feuille = clients_feuilles[client]
         feuille_combobox.set(feuille)
-        charger_fichier()
 
 def enregistrer_vente():
     global fichier
