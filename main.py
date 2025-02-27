@@ -816,6 +816,12 @@ def supprimer_client():
     else:
         resultat_label.config(text="Erreur : Client non trouvé.")
 
+def filtrer_clients(event):
+    valeur_entree = client_combobox.get().lower()
+    valeurs_filtrees = [client for client in clients_list if valeur_entree in client.lower()]
+    client_combobox['values'] = valeurs_filtrees
+    client_combobox.event_generate('<Down>')
+
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
@@ -869,6 +875,7 @@ retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 retour_button.grid_remove() 
 
 client_combobox = ttk.Combobox(app, values=clients_list)
+client_combobox.bind('<KeyRelease>', filtrer_clients)
 
 supprimer_client_button = tk.Button(app, text="-", command=supprimer_client, fg="black", width=0, height=0)
 
