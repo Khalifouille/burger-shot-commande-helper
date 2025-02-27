@@ -226,10 +226,10 @@ def confirmer_vente2():
         for client in clients:
             if client and client not in clients_list:
                 clients_list.append(client)
-                clients_feuilles[client] = nom_feuille  # Associer le client à la feuille
+                clients_feuilles[client] = nom_feuille 
                 print(f"Client '{client}' ajouté avec succès.")
             elif client in clients_feuilles and clients_feuilles[client] != nom_feuille:
-                clients_feuilles[client] = nom_feuille  # Mettre à jour la feuille associée au client
+                clients_feuilles[client] = nom_feuille
                 print(f"Client '{client}' mis à jour avec la feuille '{nom_feuille}'.")
 
         if clients:
@@ -839,6 +839,12 @@ def valider_quantite(event):
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
+style = ttk.Style()
+style.configure("TLabel", font=("Helvetica", 12), foreground="black")
+style.configure("TButton", font=("Helvetica", 12), foreground="white", background="blue")
+style.configure("TCombobox", font=("Helvetica", 12))
+style.map("TButton", background=[("active", "darkblue")])
+
 image_path = "bs.png"
 image = Image.open(image_path)
 image = image.resize((300, 100), Image.Resampling.LANCZOS)
@@ -849,97 +855,97 @@ for i in range(3):
 for i in range(18):
     app.rowconfigure(i, weight=1)
 
-titre_label = tk.Label(app, image=photo)
+titre_label = tk.Label(app, image=photo, style="TLabel")
 titre_label.grid(row=0, column=0, columnspan=3, pady=10, sticky="nsew")
 
-feuille_id_label = tk.Label(app, text="Sélectionner le GSheet :")
+feuille_id_label = ttk.Label(app, text="Sélectionner le GSheet :", style="TLabel")
 feuille_id_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
 
-feuille_id_combobox = ttk.Combobox(app, values=list(fichiers_ids.keys()))
+feuille_id_combobox = ttk.Combobox(app, values=list(fichiers_ids.keys()), style="TCombobox")
 feuille_id_combobox.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
 feuille_id_combobox.current(0)
 
-charger_fichier_button = tk.Button(app, text="Charger le fichier", command=charger_fichier)
+charger_fichier_button = ttk.Button(app, text="Charger le fichier", command=charger_fichier, style="TButton")
 charger_fichier_button.grid(row=1, column=2, padx=10, pady=10, sticky="ew")
 
-bilan_button = tk.Button(app, text="Afficher le bilan des ventes", command=obtenir_bilan_ventes_json)
+bilan_button = ttk.Button(app, text="Afficher le bilan des ventes", command=obtenir_bilan_ventes_json, style="TButton")
 bilan_button.grid(row=2, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
 
-bouton_service = tk.Button(app, text="Prise de service", command=prise_fin_service, bg="green")
+bouton_service = ttk.Button(app, text="Prise de service", command=prise_fin_service, style="TButton")
 bouton_service.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
 
-bouton_pause_reprise = tk.Button(app, text="Pause/Reprise", command=pause_reprise_service, bg="orange", state=tk.DISABLED)
+bouton_pause_reprise = ttk.Button(app, text="Pause/Reprise", command=pause_reprise_service, style="TButton", state=tk.DISABLED)
 bouton_pause_reprise.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
 
-pause_timer_label = tk.Label(app, text="Pause: 00:00:00")
+pause_timer_label = ttk.Label(app, text="Pause: 00:00:00", style="TLabel")
 pause_timer_label.grid(row=18, column=0, columnspan=3, padx=10, pady=10, sticky="w")
 pause_timer_label.grid_remove()
 
-nom_label = tk.Label(app, text="Votre nom :")
-nom_entry = tk.Entry(app)
+nom_label = ttk.Label(app, text="Votre nom :", style="TLabel")
+nom_entry = ttk.Entry(app, style="TEntry")
 
-nom2_label = tk.Label(app, text="Vendeur :")
-nom2_entry = tk.Entry(app)
+nom2_label = ttk.Label(app, text="Vendeur :", style="TLabel")
+nom2_entry = ttk.Entry(app, style="TEntry")
 
-client_label = tk.Label(app, text="Client :")
-client_entry = tk.Entry(app)
+client_label = ttk.Label(app, text="Client :", style="TLabel")
+client_entry = ttk.Entry(app, style="TEntry")
 
-retour_button = tk.Button(app, text="Page Acceuil", command=retour)
+retour_button = ttk.Button(app, text="Page Acceuil", command=retour, style="TButton")
 retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
-retour_button.grid_remove() 
+retour_button.grid_remove()
 
-client_combobox = ttk.Combobox(app, values=clients_list)
+client_combobox = ttk.Combobox(app, values=clients_list, style="TCombobox")
 client_combobox.bind('<KeyRelease>', filtrer_clients)
 
-supprimer_client_button = tk.Button(app, text="-", command=supprimer_client, fg="black", width=0, height=0)
+supprimer_client_button = ttk.Button(app, text="-", command=supprimer_client, style="TButton")
 
-date_label = tk.Label(app, text="Date :")
+date_label = ttk.Label(app, text="Date :", style="TLabel")
 date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
 
-feuille_label = tk.Label(app, text="Sélectionner la feuille :")
-feuille_combobox = ttk.Combobox(app, values=[])
+feuille_label = ttk.Label(app, text="Sélectionner la feuille :", style="TLabel")
+feuille_combobox = ttk.Combobox(app, values=[], style="TCombobox")
 
-menu_classic_label = tk.Label(app, text="Menu Classic:")
-menu_classic_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
+menu_classic_label = ttk.Label(app, text="Menu Classic:", style="TLabel")
+menu_classic_combobox = ttk.Combobox(app, values=list(range(100)), state="normal", style="TCombobox")
 menu_classic_combobox.current(0)
 
-menu_double_label = tk.Label(app, text="Menu Double:")
-menu_double_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
+menu_double_label = ttk.Label(app, text="Menu Double:", style="TLabel")
+menu_double_combobox = ttk.Combobox(app, values=list(range(100)), state="normal", style="TCombobox")
 menu_double_combobox.current(0)
 
-menu_contrat_label = tk.Label(app, text="Menu Contrat:")
-menu_contrat_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
+menu_contrat_label = ttk.Label(app, text="Menu Contrat:", style="TLabel")
+menu_contrat_combobox = ttk.Combobox(app, values=list(range(100)), state="normal", style="TCombobox")
 menu_contrat_combobox.current(0)
 
-tenders_label = tk.Label(app, text="Tenders:")
-tenders_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
+tenders_label = ttk.Label(app, text="Tenders:", style="TLabel")
+tenders_combobox = ttk.Combobox(app, values=list(range(100)), state="normal", style="TCombobox")
 tenders_combobox.current(0)
 
-petite_salade_label = tk.Label(app, text="Petite Salade:")
-petite_salade_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
+petite_salade_label = ttk.Label(app, text="Petite Salade:", style="TLabel")
+petite_salade_combobox = ttk.Combobox(app, values=list(range(100)), state="normal", style="TCombobox")
 petite_salade_combobox.current(0)
 
-boisson_label = tk.Label(app, text="Boisson:")
-boisson_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
+boisson_label = ttk.Label(app, text="Boisson:", style="TLabel")
+boisson_combobox = ttk.Combobox(app, values=list(range(100)), state="normal", style="TCombobox")
 boisson_combobox.current(0)
 
-milkshake_label = tk.Label(app, text="Milkshake:")
-milkshake_combobox = ttk.Combobox(app, values=list(range(100)), state="normal")
+milkshake_label = ttk.Label(app, text="Milkshake:", style="TLabel")
+milkshake_combobox = ttk.Combobox(app, values=list(range(100)), state="normal", style="TCombobox")
 milkshake_combobox.current(0)
 
-prix_total_label = tk.Label(app, text="Prix total : 0 $")
+prix_total_label = ttk.Label(app, text="Prix total : 0 $", style="TLabel")
 
-confirmer_button = tk.Button(app, text="Confirmer la vente", command=confirmer_vente)
+confirmer_button = ttk.Button(app, text="Confirmer la vente", command=confirmer_vente, style="TButton")
 
-confirmer_button2 = tk.Button(app, text="Confirmer la vente", command=confirmer_vente2)
+confirmer_button2 = ttk.Button(app, text="Confirmer la vente", command=confirmer_vente2, style="TButton")
 
-sauvegarder_preferences_button = tk.Button(app, text="Sauvegarder les préférences", command=sauvegarder_preferences)
+sauvegarder_preferences_button = ttk.Button(app, text="Sauvegarder les préférences", command=sauvegarder_preferences, style="TButton")
 sauvegarder_preferences_button.grid(row=6, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
 
-graphique_button = tk.Button(app, text="Générer le graphique des ventes", command=generer_graphique_ventes)
+graphique_button = ttk.Button(app, text="Générer le graphique des ventes", command=generer_graphique_ventes, style="TButton")
 graphique_button.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
 
-resultat_label = tk.Label(app, text="")
+resultat_label = ttk.Label(app, text="", style="TLabel")
 
 for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
                  tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
