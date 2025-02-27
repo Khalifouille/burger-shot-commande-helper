@@ -904,7 +904,7 @@ client_combobox.bind('<KeyRelease>', filtrer_clients)
 supprimer_client_button = ttk.Button(app, text="-", command=supprimer_client, style="TButton")
 
 date_label = ttk.Label(app, text="Date :", style="TLabel")
-date_entry = DateEntry(app, date_pattern='yyyy-mm-dd', style="TDateEntry")
+date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
 
 feuille_label = ttk.Label(app, text="Sélectionner la feuille :", style="TLabel")
 feuille_combobox = ttk.Combobox(app, values=[], style="TCombobox")
