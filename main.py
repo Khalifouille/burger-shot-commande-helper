@@ -840,10 +840,14 @@ app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
 style = ttk.Style()
-style.configure("TLabel", font=("Helvetica", 12), foreground="black")
-style.configure("TButton", font=("Helvetica", 12), foreground="white", background="blue")
-style.configure("TCombobox", font=("Helvetica", 12))
-style.map("TButton", background=[("active", "darkblue")])
+style.theme_use("clam")
+style.configure("TLabel", font=("Helvetica", 12), foreground="#333333", background="#f0f0f0")
+style.configure("TButton", font=("Helvetica", 12), foreground="#ffffff", background="#007acc", padding=10)
+style.map("TButton", background=[("active", "#005f99")])
+style.configure("TCombobox", font=("Helvetica", 12), padding=5)
+style.configure("TEntry", font=("Helvetica", 12), padding=5)
+style.configure("TDateEntry", font=("Helvetica", 12), padding=5)
+app.configure(bg="#f0f0f0")
 
 image_path = "bs.png"
 image = Image.open(image_path)
@@ -855,7 +859,7 @@ for i in range(3):
 for i in range(18):
     app.rowconfigure(i, weight=1)
 
-titre_label = tk.Label(app, image=photo, style="TLabel")
+titre_label = ttk.Label(app, image=photo, style="TLabel")
 titre_label.grid(row=0, column=0, columnspan=3, pady=10, sticky="nsew")
 
 feuille_id_label = ttk.Label(app, text="Sélectionner le GSheet :", style="TLabel")
@@ -900,7 +904,7 @@ client_combobox.bind('<KeyRelease>', filtrer_clients)
 supprimer_client_button = ttk.Button(app, text="-", command=supprimer_client, style="TButton")
 
 date_label = ttk.Label(app, text="Date :", style="TLabel")
-date_entry = DateEntry(app, date_pattern='yyyy-mm-dd')
+date_entry = DateEntry(app, date_pattern='yyyy-mm-dd', style="TDateEntry")
 
 feuille_label = ttk.Label(app, text="Sélectionner la feuille :", style="TLabel")
 feuille_combobox = ttk.Combobox(app, values=[], style="TCombobox")
