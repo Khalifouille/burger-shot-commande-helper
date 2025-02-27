@@ -229,10 +229,10 @@ def confirmer_vente2():
         for client in clients:
             if client and client not in clients_list:
                 clients_list.append(client)
-                clients_feuilles[client] = nom_feuille
+                clients_feuilles[client] = nom_feuille  # Associer le client à la feuille
                 print(f"Client '{client}' ajouté avec succès.")
             elif client in clients_feuilles and clients_feuilles[client] != nom_feuille:
-                clients_feuilles[client] = nom_feuille 
+                clients_feuilles[client] = nom_feuille  # Mettre à jour la feuille associée au client
                 print(f"Client '{client}' mis à jour avec la feuille '{nom_feuille}'.")
 
         if clients:
@@ -320,6 +320,13 @@ def confirmer_vente2():
             resultat_label.config(text="Erreur : Ligne non trouvée.")
     except Exception as e:
         resultat_label.config(text=f"Erreur : {e}")
+
+def mettre_a_jour_feuille_selectionnee(event):
+    client = client_combobox.get().strip()
+    if client in clients_feuilles:
+        feuille = clients_feuilles[client]
+        feuille_combobox.set(feuille)
+        charger_fichier()
 
 def enregistrer_vente():
     global fichier
@@ -904,6 +911,8 @@ resultat_label = tk.Label(app, text="")
 for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
                  tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
     combobox.bind("<<ComboboxSelected>>", lambda event: calculer_prix_total())
+
+client_combobox.bind("<<ComboboxSelected>>", mettre_a_jour_feuille_selectionnee)
 
 charger_clients_json()
 client_combobox["values"] = clients_list
