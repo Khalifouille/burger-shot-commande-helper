@@ -818,9 +818,13 @@ def supprimer_client():
 
 def filtrer_clients(event):
     valeur_entree = client_combobox.get().lower()
-    valeurs_filtrees = [client for client in clients_list if valeur_entree in client.lower()]
-    client_combobox['values'] = valeurs_filtrees
-    client_combobox.event_generate('<Down>')
+    if valeur_entree:
+        valeurs_filtrees = [client for client in clients_list if valeur_entree in client.lower()]
+        client_combobox['values'] = valeurs_filtrees
+        if valeurs_filtrees:
+            client_combobox.event_generate('<Down>')
+    else:
+        client_combobox['values'] = clients_list
 
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
