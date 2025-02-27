@@ -950,5 +950,4 @@ client_combobox.bind("<<ComboboxSelected>>", mettre_a_jour_feuille_selectionnee)
 
 charger_clients_json()
 client_combobox["values"] = clients_list
-#charger_preferences()
 app.mainloop()
