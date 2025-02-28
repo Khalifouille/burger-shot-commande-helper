@@ -928,7 +928,7 @@ client_combobox = ttk.Combobox(app, values=clients_list)
 client_combobox.bind('<KeyRelease>', filtrer_clients)
 client_combobox['state'] = 'normal'
 
-listbox_suggestions = tk.Listbox(app)
+listbox_suggestions = tk.Listbox(app, height=10)
 listbox_suggestions.bind('<<ListboxSelect>>', selectionner_suggestion)
 
 supprimer_client_button = tk.Button(app, text="-", command=supprimer_client, fg="black", width=0, height=0)
