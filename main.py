@@ -847,16 +847,20 @@ def filtrer_clients(event):
     listbox_suggestions.delete(0, tk.END)
     if valeur_entree:
         valeurs_filtrees = [client for client in clients_list if valeur_entree in client.lower()]
-        for client in valeurs_filtrees:
+        for client in valeurs_filtrees[:10]:
             listbox_suggestions.insert(tk.END, client)
         listbox_suggestions.place(x=client_combobox.winfo_x(), y=client_combobox.winfo_y() + client_combobox.winfo_height())
+        listbox_suggestions.config(height=min(10, len(valeurs_filtrees)))  
     else:
         listbox_suggestions.place_forget()
 
 def selectionner_suggestion(event):
-    selection = listbox_suggestions.get(listbox_suggestions.curselection())
-    client_combobox.set(selection)
-    listbox_suggestions.place_forget()
+    try:
+        selection = listbox_suggestions.get(listbox_suggestions.curselection())
+        client_combobox.set(selection)
+        listbox_suggestions.place_forget()
+    except tk.TclError:
+        pass
 
 def valider_quantite(event):
     try:
