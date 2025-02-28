@@ -11,10 +11,12 @@ import requests
 from webhook import WEBHOOK_URL, USER_TOKEN, CHANNEL_ID
 import matplotlib.pyplot as plt
 import time
+import csv
 
 VENTES_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "ventes.json")
 CLIENTS_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "clients.json")
 PREFERENCES_JSON_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "preferences.json")
+EXPORTE_CSV_PATH = os.path.join(os.getenv("APPDATA"), "burger_shot_commande_helper", "ventes.csv")
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_name("api_key.json", scope)
@@ -103,15 +105,11 @@ def afficher_elements_accueil():
     feuille_id_label.grid(row=1, column=0, padx=10, pady=10)
     feuille_id_combobox.grid(row=1, column=1, padx=10, pady=10)
     charger_fichier_button.grid(row=1, column=2, padx=10, pady=10)
-
     bilan_button.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
     graphique_button.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
-
     bouton_service.grid(row=4, column=0, columnspan=3, padx=10, pady=10)
     bouton_pause_reprise.grid(row=5, column=0, columnspan=3, padx=10, pady=10)
-
     sauvegarder_preferences_button.grid(row=6, column=0, columnspan=3, padx=10, pady=10)
-
     current_page = "accueil"
 
 
@@ -121,13 +119,12 @@ def ajouter_valeurs(sheet, ligne, valeurs, case_a_cocher=False):
             mises_a_jour = []
             for col, val in valeurs.items():
                 index_col = ord(col.upper()) - ord("A") + 1
-                
+
                 if col == 'F' and case_a_cocher:
                     nouvelle_valeur = val  
                 else:
                     cellule = sheet.cell(ligne, index_col).value
                     nouvelle_valeur = str(int(cellule) + val) if cellule and cellule.isdigit() else str(val)
-                
                 mises_a_jour.append({"range": f"{col}{ligne}", "values": [[nouvelle_valeur]]})
 
             if mises_a_jour:
@@ -589,6 +586,7 @@ def afficher_elements():
     bouton_service.grid_remove()
     bouton_pause_reprise.grid_remove()
     supprimer_client_button.grid_remove()
+    exporter_button.grid_remove()
     current_page = "ventes_civiles"
 
 def afficher_elements2():
@@ -610,6 +608,7 @@ def afficher_elements2():
     sauvegarder_preferences_button.grid_remove()
     bouton_service.grid_remove()
     bouton_pause_reprise.grid_remove()
+    exporter_button.grid_remove()
     current_page = "ventes_contrats"
 
 def masquer_elements():
@@ -872,6 +871,34 @@ def valider_quantite(event):
         combobox.set(0)
         calculer_prix_total()
 
+def exporter_ventes_csv():
+    try:
+        if not os.path.exists(VENTES_JSON_PATH):
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+        if os.path.getsize(VENTES_JSON_PATH) == 0:
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+        with open(VENTES_JSON_PATH, "r") as f:
+            data = json.load(f)
+
+        if not data:
+            messagebox.showinfo("Info", "Aucune vente enregistrée.")
+            return
+
+        with open(EXPORTE_CSV_PATH, "w", newline='') as csvfile:
+            fieldnames = ['Date', 'Produit', 'Quantité']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for date, ventes in data.items():
+                for produit, quantite in ventes.items():
+                    writer.writerow({'Date': date, 'Produit': produit, 'Quantité': quantite})
+
+        messagebox.showinfo("Succès", "Les ventes ont été exportées avec succès au format CSV.")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de l'exportation des ventes : {e}")
+
 app = tk.Tk()
 app.title("Burger Shot - Commande Helper")
 
@@ -923,6 +950,9 @@ client_entry = tk.Entry(app)
 retour_button = tk.Button(app, text="Page Acceuil", command=retour)
 retour_button.grid(row=14, column=0, columnspan=3, padx=10, pady=10)
 retour_button.grid_remove() 
+
+exporter_button = tk.Button(app, text="Exporter les ventes en CSV", command=exporter_ventes_csv)
+exporter_button.grid(row=7, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
 
 client_combobox = ttk.Combobox(app, values=clients_list)
 client_combobox.bind('<KeyRelease>', filtrer_clients)
