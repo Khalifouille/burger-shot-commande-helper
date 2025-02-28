@@ -844,13 +844,19 @@ def supprimer_client():
 
 def filtrer_clients(event):
     valeur_entree = client_combobox.get().lower()
+    listbox_suggestions.delete(0, tk.END)
     if valeur_entree:
         valeurs_filtrees = [client for client in clients_list if valeur_entree in client.lower()]
-        client_combobox['values'] = valeurs_filtrees
-        if valeurs_filtrees:
-            client_combobox.event_generate('<Down>')
+        for client in valeurs_filtrees:
+            listbox_suggestions.insert(tk.END, client)
+        listbox_suggestions.place(x=client_combobox.winfo_x(), y=client_combobox.winfo_y() + client_combobox.winfo_height())
     else:
-        client_combobox['values'] = clients_list
+        listbox_suggestions.place_forget()
+
+def selectionner_suggestion(event):
+    selection = listbox_suggestions.get(listbox_suggestions.curselection())
+    client_combobox.set(selection)
+    listbox_suggestions.place_forget()
 
 def valider_quantite(event):
     try:
@@ -916,6 +922,10 @@ retour_button.grid_remove()
 
 client_combobox = ttk.Combobox(app, values=clients_list)
 client_combobox.bind('<KeyRelease>', filtrer_clients)
+client_combobox['state'] = 'normal'
+
+listbox_suggestions = tk.Listbox(app)
+listbox_suggestions.bind('<<ListboxSelect>>', selectionner_suggestion)
 
 supprimer_client_button = tk.Button(app, text="-", command=supprimer_client, fg="black", width=0, height=0)
 
