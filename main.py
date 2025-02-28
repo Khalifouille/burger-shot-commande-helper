@@ -1011,6 +1011,9 @@ graphique_button.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="e
 
 resultat_label = tk.Label(app, text="")
 
+fait_avec_amour_label = tk.Label(app, text="Fait avec amour !", anchor="e")
+fait_avec_amour_label.grid(row=18, column=2, padx=10, pady=10, sticky="se")
+
 for combobox in [menu_classic_combobox, menu_double_combobox, menu_contrat_combobox,
                  tenders_combobox, petite_salade_combobox, boisson_combobox, milkshake_combobox]:
     combobox.bind("<<ComboboxSelected>>", lambda event: calculer_prix_total())
