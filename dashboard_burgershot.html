@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burger Shot — Sales Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: rgba(255,255,255,0.06);
+    --accent: #ff6b2b;
+    --accent2: #ffb347;
+    --accent3: #ff3d71;
+    --green: #00e5a0;
+    --blue: #4db8ff;
+    --text: #f0ede8;
+    --muted: #6b6b7a;
+    --card-glow: rgba(255,107,43,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(255,107,43,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(77,184,255,0.04) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
+    pointer-events:none; z-index:0;
+  }
+
+  header {
+    position: sticky; top:0; z-index:100;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex; align-items:center; justify-content:space-between;
+    height: 64px;
+  }
+
+  .logo {
+    display:flex; align-items:center; gap:12px;
+  }
+  .logo-icon {
+    width:36px; height:36px;
+    background: var(--accent);
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+  }
+  .logo-text {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .logo-sub {
+    font-size:10px;
+    color: var(--muted);
+    letter-spacing:3px;
+    text-transform:uppercase;
+    display:block;
+    line-height:1;
+    margin-top:2px;
+  }
+
+  .header-right {
+    display:flex; align-items:center; gap:24px;
+  }
+  .live-badge {
+    display:flex; align-items:center; gap:6px;
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.25);
+    border-radius:20px;
+    padding: 5px 12px;
+    font-size:11px;
+    color: var(--green);
+    letter-spacing:1px;
+    font-weight:500;
+  }
+  .live-dot {
+    width:6px; height:6px;
+    background:var(--green);
+    border-radius:50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(0.8); }
+  }
+
+  .period-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:12px;
+    cursor:pointer;
+    outline:none;
+  }
+
+  main {
+    position:relative; z-index:1;
+    padding: 28px 32px 48px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size:13px;
+    letter-spacing:3px;
+    color: var(--muted);
+    text-transform:uppercase;
+    margin-bottom: 16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-title::after {
+    content:''; flex:1; height:1px;
+    background: var(--border);
+  }
+
+  .kpi-grid {
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius:16px;
+    padding: 24px;
+    position:relative;
+    overflow:hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover {
+    transform:translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .kpi-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background: var(--accent-color, var(--accent));
+  }
+  .kpi-card.green { --accent-color: var(--green); }
+  .kpi-card.blue { --accent-color: var(--blue); }
+  .kpi-card.pink { --accent-color: var(--accent3); }
+
+  .kpi-label {
+    font-size:11px;
+    color: var(--muted);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:12px;
+    font-weight:500;
+  }
+  .kpi-value {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 40px;
+    line-height:1;
+    color: var(--text);
+    margin-bottom:8px;
+  }
+  .kpi-value span {
+    font-size:20px;
+    color: var(--muted);
+  }
+  .kpi-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding: 3px 8px;
+    border-radius:6px;
+    font-size:11px;
+    font-weight:600;
+    font-family:'DM Mono',monospace;
+  }
+  .kpi-badge.up { background:rgba(0,229,160,0.12); color:var(--green); }
+  .kpi-badge.down { background:rgba(255,61,113,0.12); color:var(--accent3); }
+  .kpi-icon {
+    position:absolute; right:20px; top:20px;
+    font-size:28px; opacity:0.12;
+  }
+
+  /* CHARTS GRID */
+  .charts-main {
+    display:grid;
+    grid-template-columns: 2fr 1fr;
+    gap:16px;
+    margin-bottom:16px;
+  }
+  .charts-row {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:16px;
+    margin-bottom:16px;
+  }
+  .charts-bottom {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius:16px;
+    padding: 24px;
+    position:relative;
+    overflow:hidden;
+  }
+  .chart-card.tall { min-height: 360px; }
+  .chart-card.medium { min-height: 280px; }
+
+  .chart-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:20px;
+  }
+  .chart-title {
+    font-size:13px;
+    font-weight:600;
+    color: var(--text);
+    letter-spacing:0.3px;
+  }
+  .chart-subtitle {
+    font-size:11px;
+    color: var(--muted);
+    margin-top:2px;
+  }
+  .chart-tag {
+    background: rgba(255,107,43,0.1);
+    border: 1px solid rgba(255,107,43,0.2);
+    color: var(--accent);
+    font-size:10px;
+    padding: 3px 8px;
+    border-radius:6px;
+    font-family:'DM Mono',monospace;
+    letter-spacing:0.5px;
+  }
+
+  canvas { width:100% !important; }
+
+  .city-table {
+    width:100%;
+    border-collapse: collapse;
+    font-size:13px;
+  }
+  .city-table th {
+    text-align:left;
+    color: var(--muted);
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding: 0 0 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-weight:500;
+  }
+  .city-table td {
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    vertical-align:middle;
+  }
+  .city-table tr:last-child td { border-bottom:none; }
+  .city-rank {
+    font-family:'DM Mono',monospace;
+    color: var(--muted);
+    font-size:11px;
+    width:28px;
+  }
+  .city-name { font-weight:500; }
+  .city-bar-wrap {
+    width:90px;
+    height:4px;
+    background: rgba(255,255,255,0.06);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .city-bar {
+    height:100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius:2px;
+    transition: width 1s ease;
+  }
+  .city-revenue {
+    font-family:'DM Mono',monospace;
+    font-size:12px;
+    text-align:right;
+    color: var(--text);
+  }
+  .city-pct {
+    font-family:'DM Mono',monospace;
+    font-size:10px;
+    color: var(--muted);
+    text-align:right;
+    width:40px;
+  }
+
+  .prod-list { display:flex; flex-direction:column; gap:10px; }
+  .prod-row {
+    display:flex; align-items:center; gap:10px;
+  }
+  .prod-color {
+    width:10px; height:10px;
+    border-radius:3px;
+    flex-shrink:0;
+  }
+  .prod-name { flex:1; font-size:13px; font-weight:500; }
+  .prod-bar-wrap {
+    flex:2;
+    height:6px;
+    background: rgba(255,255,255,0.05);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .prod-bar {
+    height:100%;
+    border-radius:3px;
+    transition: width 1.2s ease;
+  }
+  .prod-value {
+    font-family:'DM Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    width:70px;
+    text-align:right;
+  }
+
+  footer {
+    position:relative; z-index:1;
+    text-align:center;
+    padding: 20px;
+    color: var(--muted);
+    font-size:11px;
+    letter-spacing:1px;
+    border-top: 1px solid var(--border);
+  }
+  footer span { color:var(--accent); }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .kpi-card { animation: fadeUp 0.5s ease both; }
+  .kpi-card:nth-child(1){animation-delay:0.05s}
+  .kpi-card:nth-child(2){animation-delay:0.1s}
+  .kpi-card:nth-child(3){animation-delay:0.15s}
+  .kpi-card:nth-child(4){animation-delay:0.2s}
+  .chart-card { animation: fadeUp 0.5s ease both; animation-delay:0.25s; }
+
+  .tooltip-custom {
+    position:absolute;
+    background: rgba(17,17,24,0.95);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:12px;
+    pointer-events:none;
+    display:none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🍔</div>
+    <div>
+      <span class="logo-text">BURGER SHOT</span>
+      <span class="logo-sub">Sales Analytics Dashboard</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE DATA
+    </div>
+    <select class="period-select" id="yearFilter" onchange="filterYear(this.value)">
+      <option value="all">Toutes les années</option>
+      <option value="2021">2021</option>
+      <option value="2022">2022</option>
+      <option value="2023">2023</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+    </select>
+  </div>
+</header>
+
+<main>
+
+  <div class="section-title">Vue d'ensemble</div>
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Chiffre d'Affaires Total</div>
+      <div class="kpi-value" id="kpiRevenue">32,990,770 <span>MAD</span></div>
+      <span class="kpi-badge up">↑ +59.6% vs 2024</span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">🧾</div>
+      <div class="kpi-label">Transactions</div>
+      <div class="kpi-value" id="kpiTx">250,000</div>
+      <span class="kpi-badge up">↑ +60% vs 2024</span>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon">🛒</div>
+      <div class="kpi-label">Panier Moyen</div>
+      <div class="kpi-value" id="kpiBasket">131.96 <span>MAD</span></div>
+      <span class="kpi-badge up">↑ stable</span>
+    </div>
+    <div class="kpi-card pink">
+      <div class="kpi-icon">📍</div>
+      <div class="kpi-label">Villes actives</div>
+      <div class="kpi-value">10</div>
+      <span class="kpi-badge up">↑ couverture nationale</span>
+    </div>
+  </div>
+
+  <div class="section-title">Tendances & Géographie</div>
+  <div class="charts-main">
+    <div class="chart-card tall">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Évolution du CA mensuel</div>
+          <div class="chart-subtitle">2021 → 2025 · Revenus en MAD</div>
+        </div>
+        <span class="chart-tag">TIME SERIES</span>
+      </div>
+      <canvas id="trendChart"></canvas>
+    </div>
+
+    <div class="chart-card tall">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Top Villes</div>
+          <div class="chart-subtitle">Classement par chiffre d'affaires</div>
+        </div>
+        <span class="chart-tag">GEO</span>
+      </div>
+      <table class="city-table" id="cityTable"></table>
+    </div>
+  </div>
+
+  <div class="section-title">Analyse par Dimension</div>
+  <div class="charts-row">
+    <div class="chart-card medium">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">CA par Produit</div>
+          <div class="chart-subtitle">Part du revenu total</div>
+        </div>
+        <span class="chart-tag">DONUT</span>
+      </div>
+      <canvas id="prodDonut"></canvas>
+    </div>
+
+    <div class="chart-card medium">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Saisonnalité mensuelle</div>
+          <div class="chart-subtitle">Revenu moyen par mois · cumul</div>
+        </div>
+        <span class="chart-tag">SEASONAL</span>
+      </div>
+      <canvas id="monthChart"></canvas>
+    </div>
+
+    <div class="chart-card medium">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Distribution horaire</div>
+          <div class="chart-subtitle">Pics de vente sur 24h</div>
+        </div>
+        <span class="chart-tag">HEAT</span>
+      </div>
+      <canvas id="hourChart"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">Performance Annuelle & Produits</div>
+  <div class="charts-bottom">
+    <div class="chart-card medium">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Croissance Year-over-Year</div>
+          <div class="chart-subtitle">CA et volume de transactions par année</div>
+        </div>
+        <span class="chart-tag">YOY</span>
+      </div>
+      <canvas id="yoyChart"></canvas>
+    </div>
+
+    <div class="chart-card medium">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Classement Produits</div>
+          <div class="chart-subtitle">Revenus & quantités vendues</div>
+        </div>
+        <span class="chart-tag">RANKING</span>
+      </div>
+      <div class="prod-list" id="prodList"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Burger Shot Sales Analytics · El Mehdi Benbella · <span>250,000 transactions</span> · 2021–2025 · Données simulées à des fins analytiques
+</footer>
+
+<script>
+const DATA = {"rev_year": [["2021", 3961400], ["2022", 5276945], ["2023", 6594800], ["2024", 6609600], ["2025", 10548025]], "rev_month": [["Jan", 2189120], ["Fév", 2296810], ["Mar", 2318550], ["Avr", 2558030], ["Mai", 2751650], ["Juin", 3024460], ["Juil", 3504620], ["Août", 3359345], ["Sep", 2864810], ["Oct", 2438075], ["Nov", 2320555], ["Déc", 3364745]], "rev_city": [["Casablanca", 5768725, 43702], ["Rabat", 4356770, 33042], ["Marrakech", 3962775, 30040], ["Tanger", 3397690, 25878], ["Agadir", 3200105, 24317], ["Fès", 3050790, 23086], ["Meknès", 2494970, 18800], ["Kenitra", 2320920, 17505], ["Tetouan", 2311555, 17519], ["Oujda", 2126470, 16111]], "rev_prod": [["Menu Double", 10670100, 142268], ["Menu Classic", 7044455, 128081], ["Tenders", 4529080, 113227], ["MilkShake", 4449550, 127130], ["Menu Contrat", 4303620, 95636], ["Boisson", 1993965, 132931]], "rev_ym": [["2021-01", 244560], ["2021-02", 270805], ["2021-03", 255415], ["2021-04", 303845], ["2021-05", 332085], ["2021-06", 372470], ["2021-07", 433500], ["2021-08", 435235], ["2021-09", 348045], ["2021-10", 278490], ["2021-11", 268720], ["2021-12", 418230], ["2022-01", 326415], ["2022-02", 367010], ["2022-03", 341330], ["2022-04", 399305], ["2022-05", 443970], ["2022-06", 502485], ["2022-07", 584280], ["2022-08", 563135], ["2022-09", 448260], ["2022-10", 368980], ["2022-11", 362310], ["2022-12", 569465], ["2023-01", 413580], ["2023-02", 419735], ["2023-03", 445145], ["2023-04", 511440], ["2023-05", 555330], ["2023-06", 623035], ["2023-07", 731165], ["2023-08", 676930], ["2023-09", 585565], ["2023-10", 472620], ["2023-11", 443125], ["2023-12", 717130], ["2024-01", 558555], ["2024-02", 526850], ["2024-03", 557795], ["2024-04", 533125], ["2024-05", 547335], ["2024-06", 532740], ["2024-07", 588480], ["2024-08", 560945], ["2024-09", 556155], ["2024-10", 556105], ["2024-11", 540835], ["2024-12", 550680], ["2025-01", 646010], ["2025-02", 712410], ["2025-03", 718865], ["2025-04", 810315], ["2025-05", 872930], ["2025-06", 993730], ["2025-07", 1167195], ["2025-08", 1123100], ["2025-09", 926785], ["2025-10", 761880], ["2025-11", 705565], ["2025-12", 1109240]], "rev_hour": [[0, 511050], [1, 516765], [2, 512620], [3, 521625], [4, 519555], [5, 514680], [6, 1239660], [7, 1701175], [8, 2185720], [9, 2431070], [10, 2396275], [11, 2205190], [12, 1965895], [13, 1961555], [14, 1708205], [15, 1737820], [16, 1715260], [17, 1963680], [18, 1723675], [19, 1465775], [20, 1223785], [21, 1001265], [22, 766010], [23, 502460]], "yoy": [[2021, 3961400, 30000, 132.05], [2022, 5276945, 40000, 131.92], [2023, 6594800, 50000, 131.90], [2024, 6609600, 50000, 132.19], [2025, 10548025, 80000, 131.85]]};
+
+const COLORS = ['#ff6b2b','#ffb347','#4db8ff','#00e5a0','#ff3d71','#c084fc'];
+const fmt = (n) => n >= 1000000 ? (n/1000000).toFixed(2)+'M' : n >= 1000 ? (n/1000).toFixed(0)+'K' : n;
+const fmtMAD = (n) => new Intl.NumberFormat('fr-MA').format(n) + ' MAD';
+
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'rgba(17,17,24,0.95)',
+      borderColor: 'rgba(255,255,255,0.08)',
+      borderWidth: 1,
+      titleColor: '#f0ede8',
+      bodyColor: '#9999aa',
+      padding: 12,
+      cornerRadius: 10,
+      titleFont: { family: 'DM Sans', size: 12, weight: '600' },
+      bodyFont: { family: 'DM Mono', size: 11 },
+    }
+  },
+  scales: {
+    x: {
+      grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+      ticks: { color: '#6b6b7a', font: { family: 'DM Mono', size: 10 } }
+    },
+    y: {
+      grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+      ticks: { color: '#6b6b7a', font: { family: 'DM Mono', size: 10 }, callback: v => fmt(v) }
+    }
+  }
+};
+
+let charts = {};
+let currentYear = 'all';
+
+function buildTrend(yearFilter) {
+  let data = DATA.rev_ym;
+  if (yearFilter !== 'all') data = data.filter(d => d[0].startsWith(yearFilter));
+
+  const labels = data.map(d => d[0].slice(0,7));
+  const values = data.map(d => d[1]);
+
+  const ctx = document.getElementById('trendChart');
+  if (charts.trend) charts.trend.destroy();
+
+  const grad = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+  grad.addColorStop(0, 'rgba(255,107,43,0.3)');
+  grad.addColorStop(1, 'rgba(255,107,43,0)');
+
+  charts.trend = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: '#ff6b2b',
+        backgroundColor: grad,
+        borderWidth: 2.5,
+        pointRadius: labels.length > 30 ? 0 : 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#ff6b2b',
+        pointBorderColor: '#0a0a0f',
+        pointBorderWidth: 2,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      aspectRatio: 2.2,
+      plugins: {
+        ...chartDefaults.plugins,
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: {
+            label: ctx => ' ' + fmtMAD(ctx.parsed.y)
+          }
+        }
+      }
+    }
+  });
+}
+
+function buildCityTable() {
+  const max = DATA.rev_city[0][1];
+  const total = DATA.rev_city.reduce((s,r)=>s+r[1],0);
+  const t = document.getElementById('cityTable');
+  t.innerHTML = `<tr>
+    <th>#</th><th>Ville</th><th style="width:100px"></th>
+    <th style="text-align:right">CA</th><th style="text-align:right">%</th>
+  </tr>`;
+  DATA.rev_city.forEach((row,i) => {
+    const pct = ((row[1]/total)*100).toFixed(1);
+    t.innerHTML += `<tr>
+      <td class="city-rank">${i+1}</td>
+      <td class="city-name">${row[0]}</td>
+      <td><div class="city-bar-wrap"><div class="city-bar" style="width:${(row[1]/max*100).toFixed(1)}%"></div></div></td>
+      <td class="city-revenue">${fmt(row[1])}</td>
+      <td class="city-pct">${pct}%</td>
+    </tr>`;
+  });
+}
+
+function buildProdDonut() {
+  const ctx = document.getElementById('prodDonut');
+  if (charts.donut) charts.donut.destroy();
+  charts.donut = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: DATA.rev_prod.map(d=>d[0]),
+      datasets: [{
+        data: DATA.rev_prod.map(d=>d[1]),
+        backgroundColor: COLORS,
+        borderColor: '#111118',
+        borderWidth: 3,
+        hoverBorderWidth: 3,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: {
+            color: '#9999aa',
+            font: { family: 'DM Sans', size: 10 },
+            padding: 12,
+            boxWidth: 10,
+            boxHeight: 10,
+            usePointStyle: true,
+            pointStyle: 'rectRounded'
+          }
+        },
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${fmt(ctx.parsed)} MAD (${((ctx.parsed/DATA.rev_prod.reduce((s,d)=>s+d[1],0))*100).toFixed(1)}%)`
+          }
+        }
+      }
+    }
+  });
+}
+
+function buildMonthChart() {
+  const ctx = document.getElementById('monthChart');
+  if (charts.month) charts.month.destroy();
+  const vals = DATA.rev_month.map(d=>d[1]);
+  const max = Math.max(...vals);
+  const bgColors = vals.map(v => {
+    const ratio = v/max;
+    return `rgba(255,${Math.round(107+ratio*50)},${Math.round(43+ratio*20)},${0.5+ratio*0.5})`;
+  });
+  charts.month = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: DATA.rev_month.map(d=>d[0]),
+      datasets: [{
+        data: vals,
+        backgroundColor: bgColors,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      aspectRatio: 1.6,
+      plugins: {
+        ...chartDefaults.plugins,
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx => ' ' + fmtMAD(ctx.parsed.y) }
+        }
+      }
+    }
+  });
+}
+
+function buildHourChart() {
+  const ctx = document.getElementById('hourChart');
+  if (charts.hour) charts.hour.destroy();
+  const vals = DATA.rev_hour.map(d=>d[1]);
+  const max = Math.max(...vals);
+  const bgColors = vals.map(v => v/max > 0.7 ? '#ff6b2b' : v/max > 0.4 ? 'rgba(255,107,43,0.5)' : 'rgba(255,107,43,0.15)');
+
+  charts.hour = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: DATA.rev_hour.map(d => d[0]+'h'),
+      datasets: [{
+        data: vals,
+        backgroundColor: bgColors,
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      aspectRatio: 1.6,
+      plugins: {
+        ...chartDefaults.plugins,
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx => ' ' + fmtMAD(ctx.parsed.y) }
+        }
+      }
+    }
+  });
+}
+
+function buildYoY() {
+  const ctx = document.getElementById('yoyChart');
+  if (charts.yoy) charts.yoy.destroy();
+
+  charts.yoy = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: DATA.yoy.map(d=>d[0]),
+      datasets: [
+        {
+          label: 'CA (MAD)',
+          data: DATA.yoy.map(d=>d[1]),
+          backgroundColor: COLORS[0],
+          borderRadius: 6,
+          borderSkipped: false,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Transactions',
+          data: DATA.yoy.map(d=>d[2]),
+          type: 'line',
+          borderColor: '#00e5a0',
+          backgroundColor: 'rgba(0,229,160,0.1)',
+          borderWidth: 2.5,
+          pointRadius: 5,
+          pointBackgroundColor: '#00e5a0',
+          pointBorderColor: '#0a0a0f',
+          pointBorderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      aspectRatio: 1.8,
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#9999aa',
+            font: { family: 'DM Sans', size: 10 },
+            boxWidth: 10, boxHeight: 10,
+            usePointStyle: true
+          }
+        }
+      },
+      scales: {
+        x: chartDefaults.scales.x,
+        y: { ...chartDefaults.scales.y, position:'left' },
+        y2: {
+          position:'right',
+          grid: { drawOnChartArea: false },
+          ticks: { color: '#00e5a0', font: { family:'DM Mono', size:10 }, callback: v => fmt(v) }
+        }
+      }
+    }
+  });
+}
+
+function buildProdList() {
+  const max = DATA.rev_prod[0][1];
+  const list = document.getElementById('prodList');
+  list.innerHTML = DATA.rev_prod.map((p,i) => `
+    <div class="prod-row">
+      <div class="prod-color" style="background:${COLORS[i]}"></div>
+      <div class="prod-name">${p[0]}</div>
+      <div class="prod-bar-wrap">
+        <div class="prod-bar" style="width:${(p[1]/max*100).toFixed(1)}%;background:${COLORS[i]}"></div>
+      </div>
+      <div class="prod-value">${fmt(p[1])}</div>
+    </div>
+  `).join('');
+}
+
+function filterYear(year) {
+  currentYear = year;
+  buildTrend(year);
+
+  // Update KPIs
+  if (year === 'all') {
+    document.getElementById('kpiRevenue').innerHTML = '32,990,770 <span>MAD</span>';
+    document.getElementById('kpiTx').innerHTML = '250,000';
+    document.getElementById('kpiBasket').innerHTML = '131.96 <span>MAD</span>';
+  } else {
+    const row = DATA.yoy.find(d => String(d[0]) === year);
+    if (row) {
+      document.getElementById('kpiRevenue').innerHTML = new Intl.NumberFormat('fr-MA').format(row[1]) + ' <span>MAD</span>';
+      document.getElementById('kpiTx').innerHTML = new Intl.NumberFormat('fr-MA').format(row[2]);
+      document.getElementById('kpiBasket').innerHTML = row[3].toFixed(2) + ' <span>MAD</span>';
+    }
+  }
+}
+
+buildTrend('all');
+buildCityTable();
+buildProdDonut();
+buildMonthChart();
+buildHourChart();
+buildYoY();
+buildProdList();
+</script>
+</body>
+</html>
