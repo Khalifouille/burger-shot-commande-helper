@@ -201,7 +201,6 @@
     font-size:28px; opacity:0.12;
   }
 
-  /* CHARTS GRID */
   .charts-main {
     display:grid;
     grid-template-columns: 2fr 1fr;
@@ -839,7 +838,6 @@ function filterYear(year) {
   currentYear = year;
   buildTrend(year);
 
-  // Update KPIs
   if (year === 'all') {
     document.getElementById('kpiRevenue').innerHTML = '32,990,770 <span>MAD</span>';
     document.getElementById('kpiTx').innerHTML = '250,000';
