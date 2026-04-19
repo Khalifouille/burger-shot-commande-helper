@@ -223,13 +223,25 @@
   .chart-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius:16px;
+    border-radius: 16px;
     padding: 24px;
-    position:relative;
-    overflow:hidden;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
-  .chart-card.tall { min-height: 360px; }
-  .chart-card.medium { min-height: 280px; }
+  .chart-card.tall { 
+    height: 450px; 
+  }
+  .chart-card.medium { 
+    height: 350px; 
+  }
+
+  .chart-card canvas {
+  flex-grow: 1;
+  width: 100% !important;
+  height: 100% !important;
+  }
 
   .chart-header {
     display:flex; align-items:flex-start; justify-content:space-between;
