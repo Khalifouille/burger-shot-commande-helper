@@ -229,7 +229,7 @@ python main.py
 
 ## 🗺️ Roadmap / Potential Improvements
 
-- [ ] **Dashboard web** — migrate from Tkinter to a Streamlit or Dash web app
+- [X] **Dashboard web** — migrate from Tkinter to a Streamlit or Dash web app
 - [ ] **Database backend** — replace JSON store with SQLite or PostgreSQL
 - [ ] **Power BI / Tableau integration** — expose data via a REST API or direct connector
 - [ ] **Automated reporting** — scheduled PDF/email reports via cron job
