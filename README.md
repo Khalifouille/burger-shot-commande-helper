@@ -4,6 +4,8 @@
 
 **Automated Sales Tracking & Data Pipeline — Server Project**
 
+[![Live Demo](https://img.shields.io/badge/Demo-Live_Dashboard-FF6B2B?style=for-the-badge&logo=googlechrome&logoColor=white)](https://khalifouille.github.io/burger-shot-commande-helper/dashboard_burgershot.html)
+
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![Google Sheets API](https://img.shields.io/badge/Google%20Sheets%20API-v4-34A853?style=flat&logo=googlesheets&logoColor=white)](https://developers.google.com/sheets/api)
 [![Discord API](https://img.shields.io/badge/Discord%20API-v9-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.com/developers/docs/intro)
