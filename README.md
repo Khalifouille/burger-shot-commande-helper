@@ -1,77 +1,241 @@
-<p align="center" width="100%">
-    <img width="50%" src="interface_graphique.png"> 
-</p>
+<div align="center">
 
-# Burger Shot Commande Helper 🍔👍
+# 🍔 Burger Shot Sales Analytics System
 
-**Gestion des commandes de Burger Shot en un clic 💻**
+**Automated Sales Tracking & Data Pipeline — Server Project**
 
-Ce script est un outil d'aide pour la gestion des commandes de Burger Shot. Il permet de gérer les ventes, les clients et les préférences de manière efficace et intuitive. 🤩
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Google Sheets API](https://img.shields.io/badge/Google%20Sheets%20API-v4-34A853?style=flat&logo=googlesheets&logoColor=white)](https://developers.google.com/sheets/api)
+[![Discord API](https://img.shields.io/badge/Discord%20API-v9-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.com/developers/docs/intro)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Fonctionnalités 🎉
+*A data pipeline and analytics dashboard built for real-time sales tracking in a GTA V roleplay environment — turning in-game transactions into structured, exploitable data.*
 
-### Gestion des ventes 📊
-- **Affichage des ventes** : Affiche les ventes enregistrées dans le fichier Google Sheets sélectionné.
-- **Modification des ventes** : Permet de modifier les ventes existantes en mettant à jour les quantités des produits vendus.
-- **Sauvegarde des ventes** : Enregistre les ventes dans un fichier JSON pour une consultation ultérieure.
+<img width="55%" src="interface_graphique.png">
 
-### Gestion des clients 👥
-- **Affichage des clients** : Affiche la liste des clients enregistrés.
-- **Ajout de clients** : Permet d'ajouter de nouveaux clients à la liste.
-- **Suppression de clients** : Permet de supprimer des clients de la liste.
+</div>
 
-### Gestion des préférences 📝
-- **Sauvegarde des préférences** : Enregistre les préférences de l'utilisateur, telles que le nom, la feuille Google Sheets sélectionnée, etc.
-- **Chargement des préférences** : Charge les préférences enregistrées lors du démarrage de l'application.
+---
 
-### Intégration avec Google Sheets 📊
-- **Sélection de la feuille Google Sheets** : Permet de sélectionner le fichier Google Sheets à utiliser pour la gestion des données.
-- **Récupération des feuilles** : Récupère les feuilles disponibles dans le fichier Google Sheets sélectionné.
-- **Mise à jour des feuilles** : Met à jour les feuilles Google Sheets avec les nouvelles ventes et les nouveaux clients.
+## 📌 Project Context
 
-### Génération de graphiques 📈
-- **Graphiques des ventes** : Génère des graphiques des ventes par produit et par date pour une visualisation facile des données.
+This project was built for a **Burger Shot franchise** on a roleplay server, where sales had to be tracked manually per shift across multiple vendors and contract types. The solution automates the entire data flow — from point-of-sale entry to cloud storage, real-time reporting, and visual analytics.
 
-### Notifications Discord 🔔
-- **Envoi de notifications** : Envoie des notifications sur un serveur Discord pour informer des nouvelles ventes enregistrées.
+What started as a simple helper script became a **full end-to-end data pipeline** covering ingestion, transformation, storage, visualization, and alerting.
 
-## Utilisation 📚
+---
 
-1. **Exécuter le script** : Lancez l'application en exécutant le script `main.py`.
-2. **Sélectionner le fichier Google Sheets** : Choisissez le fichier Google Sheets que vous souhaitez utiliser pour la gestion des données.
-3. **Afficher les ventes et les clients** : Utilisez les boutons correspondants pour afficher les ventes et les clients.
-4. **Modifier les ventes et les clients** : Utilisez les formulaires pour ajouter ou modifier les ventes et les clients.
-5. **Sauvegarder les préférences** : Cliquez sur le bouton "Sauvegarder les préférences" pour enregistrer vos préférences.
-6. **Générer des graphiques** : Utilisez le bouton "Générer le graphique des ventes" pour visualiser les ventes sous forme de graphiques.
+## 🎯 Business Problem & Data Objectives
 
-## Configuration 🔧
+| Problem | Solution |
+|---|---|
+| Manual, error-prone sales tracking | Structured entry form with validation |
+| No historical data retention | JSON-based local data lake + CSV export |
+| No sales visibility between shifts | Real-time Discord webhook notifications |
+| Inability to spot trends | Matplotlib time-series chart generation |
+| Disconnected client data | Client registry with session persistence |
 
-- **Fichier de configuration** : `api_key.json` pour la configuration de l'API Google Sheets.
-- **Fichier de sauvegarde des ventes** : `ventes.json` pour la sauvegarde des ventes.
-- **Fichier de sauvegarde des clients** : `clients.json` pour la sauvegarde des clients.
-- **Fichier de sauvegarde des préférences** : `preferences.json` pour la sauvegarde des préférences.
+---
 
-## Dépendances 📦
+## 🏗️ Architecture & Data Flow
 
-- `tkinter` pour l'interface graphique.
-- `gspread` pour l'intégration avec Google Sheets.
-- `oauth2client` pour l'authentification avec Google Sheets.
-- `json` pour la sauvegarde des données.
-- `matplotlib` pour la génération de graphiques.
-- `requests` pour l'envoi de notifications Discord.
+```
+[User Input - Tkinter GUI]
+         │
+         ▼
+[Data Validation Layer]
+         │
+    ┌────┴────┐
+    ▼         ▼
+[Google Sheets]    [Local JSON Store]
+  (live ledger)      (data lake)
+         │
+    ┌────┴────┐
+    ▼         ▼
+[CSV Export]    [Matplotlib Charts]
+(analytics)      (trend analysis)
+         │
+         ▼
+[Discord Webhook — Real-time Alerts]
+```
 
-## Changelog 📝
+Two separate data streams are handled:
+- **Civil sales** — product-level sales by vendor, aggregated per shift
+- **Contract sales** — client-linked transactions with date tracking and checkbox validation
 
-- **Version 1.0** : Première version du script.
-- **Version 1.1** : Ajout de la fonctionnalité de sauvegarde des préférences.
-- **Version 1.2** : Correction de bugs et amélioration de la performance.
+---
 
-## Prochaines étapes 🚀
+## 📊 Data & Analytics Features
 
-- **Ajout de la fonctionnalité de génération de graphiques** : Améliorer la génération de graphiques pour une meilleure visualisation des données.
-- **Amélioration de l'interface graphique** : Rendre l'interface plus intuitive et conviviale.
-- **Ajout de la fonctionnalité de notification** : Ajouter des notifications pour informer des nouvelles ventes et des mises à jour importantes.
+### 🔄 Data Ingestion
+- Dual Google Sheets integration (civil vs. contract pipelines)
+- Automatic row detection and incremental updates via `gspread`
+- Sheet-level routing based on transaction type
 
-## Capture d'écran de la génération de graphiques
+### 🗄️ Data Storage
+- **JSON data lake** (`ventes.json`) — date-partitioned sales records persisted locally in `%APPDATA%`
+- **Client registry** (`clients.json`) — entity store with sheet-level metadata
+- **Preferences store** (`preferences.json`) — session state persistence
 
-![Génération de graphiques](generation_graphiques.png)
+### 📈 Analytics & Reporting
+- **Sales bilan (report)** — filterable by date range, product, and quantity threshold
+- **Time-series visualization** — product sales trends plotted over time with Matplotlib
+- **CSV export** — flat-file output for downstream analysis in Excel / Power BI / etc.
+- **Revenue calculation** — real-time total based on configurable unit prices
+
+### 🔔 Alerting
+- Embedded Discord notifications with rich embeds on every confirmed sale
+- Service log tracking (shift start/end, breaks with duration timer)
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Python 3.10+ |
+| GUI | Tkinter + tkcalendar |
+| Cloud Data Store | Google Sheets (via `gspread` + OAuth2) |
+| Local Data Store | JSON (file-based, `%APPDATA%`) |
+| Visualization | Matplotlib |
+| Alerting | Discord Webhook API (REST) |
+| Export | CSV (standard library) |
+| Auth | `oauth2client` — Service Account |
+
+---
+
+## 📁 Project Structure
+
+```
+burger-shot-analytics/
+│
+├── main.py                  # Core application — GUI + data logic
+├── webhook.py               # Discord credentials (gitignored)
+├── api_key.json             # Google Sheets service account (gitignored)
+│
+├── preferences.json         # User session config
+├── clients.json             # Client registry
+│
+├── bs.png                   # App branding
+├── interface_graphique.png  # UI screenshot
+├── generation_graphiques.png# Analytics screenshot
+│
+└── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+```bash
+pip install gspread oauth2client pillow tkcalendar matplotlib requests
+```
+
+### Google Sheets API Setup
+
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable the **Google Sheets API** and **Google Drive API**
+3. Create a **Service Account** and download the key as `api_key.json`
+4. Share your Google Sheets file with the service account email
+
+### Discord Webhook Setup
+
+Create a `webhook.py` file (gitignored) with:
+
+```python
+WEBHOOK_URL = "your_webhook_url"
+USER_TOKEN  = "your_user_token"
+CHANNEL_ID  = "your_channel_id"
+```
+
+### Run
+
+```bash
+python main.py
+```
+
+---
+
+## 📉 Data Schema
+
+### `ventes.json` — Sales Data Lake
+
+```json
+{
+  "2025-04-19": {
+    "Menu Classic": 12,
+    "Menu Double": 5,
+    "Boisson": 18,
+    "Milkshake": 7
+  }
+}
+```
+
+### `clients.json` — Client Registry
+
+```json
+{
+  "clients": ["Client A", "Client B"],
+  "clients_feuilles": {
+    "Client A": "Organisme X",
+    "Client B": "Organisme Y"
+  }
+}
+```
+
+### Unit Prices Reference
+
+| Product | Price ($) |
+|---|---|
+| Menu Classic | 100 |
+| Menu Double | 120 |
+| Menu Contrat | — |
+| Tenders | 60 |
+| Petite Salade | 60 |
+| Boisson | 30 |
+| Milkshake | 40 |
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+**Sales Entry Interface**
+<img src="interface_graphique.png" width="60%"/>
+
+**Sales Trend Chart (Matplotlib)**
+<img src="generation_graphiques.png" width="60%"/>
+
+</div>
+
+---
+
+## 💡 Key Learnings & Data Skills Demonstrated
+
+- **ETL pipeline design** — extraction from UI input, transformation via business logic, loading into both a cloud ledger and a local store
+- **API integration** — Google Sheets REST API for live read/write operations, Discord Webhook API for push notifications
+- **Data modeling** — schema design for date-partitioned JSON records and a relational client-to-sheet mapping
+- **Analytical reporting** — filterable date-range reports, aggregations, and revenue calculations
+- **Data visualization** — time-series charts with multi-product overlay using Matplotlib
+- **Data export pipeline** — JSON → CSV conversion for downstream tooling compatibility
+- **State management** — session persistence across application restarts via local JSON configs
+
+---
+
+## 🗺️ Roadmap / Potential Improvements
+
+- [ ] **Dashboard web** — migrate from Tkinter to a Streamlit or Dash web app
+- [ ] **Database backend** — replace JSON store with SQLite or PostgreSQL
+- [ ] **Power BI / Tableau integration** — expose data via a REST API or direct connector
+- [ ] **Automated reporting** — scheduled PDF/email reports via cron job
+- [ ] **Statistical analysis** — peak hours, best-selling products, vendor performance KPIs
+- [ ] **Data quality layer** — anomaly detection and input validation rules
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE).
